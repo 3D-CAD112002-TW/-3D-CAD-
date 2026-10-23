@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>迷你 CAD｜3D 建模</title>
+<style>
+:root{--bg:#f3f5f8;--pn:#fff;--tx:#1d2733;--mu:#6b7785;--bd:#d3dae4;--ac:#1a73e8;--hv:#e6effd;--v1:#eef2f7;--v2:#c5cfdc}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161c;--pn:#1b2129;--tx:#e6ebf1;--mu:#8b97a5;--bd:#2f3844;--ac:#6aa6ff;--hv:#243247;--v1:#2c3542;--v2:#12171d}}
+:root[data-theme="dark"]{--bg:#12161c;--pn:#1b2129;--tx:#e6ebf1;--mu:#8b97a5;--bd:#2f3844;--ac:#6aa6ff;--hv:#243247;--v1:#2c3542;--v2:#12171d}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:13px/1.4 system-ui,-apple-system,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;overflow:hidden}
+#app{display:grid;height:100%;grid-template:"t" auto "v" 1fr "s" minmax(0,38%)/minmax(0,1fr)}
+#bar{grid-area:t;display:flex;gap:6px;padding:6px;flex-wrap:wrap;background:var(--pn);border-bottom:1px solid var(--bd);align-items:center}
+#bar button{flex:1 1 0;max-width:120px;min-width:0;padding:0 4px}
+#bar button.op{background:var(--hv);border-color:var(--ac);color:var(--ac)}
+button,select{flex:none;height:32px;padding:0 9px;border:1px solid var(--bd);border-radius:7px;background:var(--pn);color:var(--tx);font:inherit;white-space:nowrap}
+button.on,button.pri{background:var(--ac);border-color:var(--ac);color:#fff}
+#vp{grid-area:v;position:relative;min-height:0;background:linear-gradient(var(--v1),var(--v2));--gb:112px;--gr:36px;--gh:112px}
+canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+#hint{position:absolute;left:8px;top:8px;right:var(--gh);pointer-events:none;color:var(--mu);font-size:12px}
+#gz{inset:auto;top:8px;right:8px;width:96px;height:96px;cursor:pointer}
+#side{grid-area:s;display:grid;grid-template-columns:1fr 1fr;min-height:0;border-top:1px solid var(--bd)}
+#tree,#props{overflow:auto;padding:8px;background:var(--pn);min-height:0}
+#tree{border-right:1px solid var(--bd)}
+h4{margin:0 0 6px;font-size:12px;color:var(--mu);font-weight:600}
+.it{display:flex;justify-content:space-between;padding:6px 8px;border-radius:6px;cursor:pointer}
+.it.on{background:var(--hv);color:var(--ac)}
+.pl{color:var(--mu)}
+label{display:flex;justify-content:space-between;align-items:center;gap:6px;margin:4px 0}
+input[type=number]{width:90px;height:30px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx);padding:0 6px;font:inherit}
+input[type=text]{width:120px;height:30px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx);padding:0 6px;font:inherit}input[type=text].rn{width:100%;height:24px;box-sizing:border-box}#as{margin-left:auto;align-self:center;font-size:12px;opacity:.7;padding:0 8px;white-space:nowrap}
+input[type=color]{width:90px;height:30px;padding:0;border:1px solid var(--bd);border-radius:6px;background:none}
+.mu{color:var(--mu)}
+#mass{margin-top:8px;padding-top:6px;border-top:1px dashed var(--bd)}
+#del,#zup{margin-top:6px;width:100%}
+#mn{position:fixed;z-index:20;min-width:200px;max-width:calc(100vw - 12px);max-height:70vh;overflow:auto;padding:4px;background:var(--pn);border:1px solid var(--bd);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+#mn button{display:block;width:100%;height:42px;text-align:left;border:0;background:none}
+#mn button:active{background:var(--hv)}
+#mn button.on{background:var(--hv);color:var(--ac)}
+#mn button.tg.on::after{content:"✓";float:right}
+#mn label{margin:0;padding:4px 10px}
+#mn h4{margin:6px 10px 2px}
+#mn button:disabled{opacity:.4}
+#sh{display:none;position:fixed;z-index:30;top:calc(8px + env(safe-area-inset-top,0px));right:8px;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.hu #sh{display:block;left:8px;right:auto}
+.hu #bar,.hu #side,.hu #hint{display:none}
+.hu #app{grid-template:"v" 1fr/minmax(0,1fr)}
+@media(min-width:800px){#app{grid-template:"t t t" auto "f v p" 1fr/210px minmax(0,1fr) 270px}#side{display:contents}#tree{grid-area:f;border-top:0}#props{grid-area:p;border-left:1px solid var(--bd)}}
+#lbtn{position:absolute;top:var(--gb);right:var(--gr);width:40px;height:40px;padding:0;border-radius:50%;font-size:20px;line-height:1;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#mvbtn,#rtbtn{position:absolute;top:calc(var(--gb) + 46px);right:var(--gr);width:40px;height:40px;padding:0;border-radius:50%;font-size:22px;line-height:1;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#rtbtn{top:calc(var(--gb) + 92px)}
+#lp{position:absolute;z-index:3;left:8px;bottom:8px;width:min(340px,calc(100% - 16px));padding:8px 10px;background:var(--pn);background:color-mix(in srgb,var(--pn) 94%,transparent);border:1px solid var(--bd);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.25);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+#lp[hidden]{display:none}
+#lh{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+#lt{display:flex;gap:4px;flex:1;min-width:0}
+#lt button,#lx{height:28px;padding:0 6px}
+#lt button{flex:1 1 0;min-width:0}
+#lt i{display:inline-block;width:8px;height:8px;margin-right:4px;border-radius:50%;border:1px solid var(--mu)}
+#lx{width:28px;padding:0}
+#lp .r{display:flex;align-items:center;gap:8px;margin:4px 0;min-height:28px}
+#lp .r label{display:flex;align-items:center;gap:6px;margin:0}
+#lp .ln{flex:none;width:56px;color:var(--mu)}
+#lp input[type=range]{flex:1;min-width:0;height:28px;margin:0;accent-color:var(--ac)}
+#lp input[type=checkbox]{width:18px;height:18px;margin:0;accent-color:var(--ac)}
+#lp output{flex:none;width:44px;text-align:right;font-variant-numeric:tabular-nums}
+#lp .sw{display:flex;gap:6px;flex:1;min-width:0}
+#lp .sw button{width:24px;height:24px;padding:0;border-radius:50%;border:1px solid var(--bd)}
+#lp input[type=color]{width:40px;height:28px;flex:none}
+#lp .g{margin-left:auto;height:28px;font-size:12px;color:var(--mu)}
+.bo{display:flex;gap:6px;margin-bottom:6px}.bo button{flex:1;padding:0 4px}
+.hu #lbtn,.hu #mvbtn,.hu #rtbtn,.hu #lp{display:none}
+#props input[type=range]{width:90px;accent-color:var(--ac)}#props select{max-width:100px}
+#props select[data-k=mat]{width:150px;max-width:150px;text-overflow:ellipsis}.mnote{font-size:12px;margin:-2px 0 6px}
+/* 分類工具列：第二行顯示所選分類的按鈕，超出寬度時可左右捲動 */
+#bar #mn{position:static;order:9;flex:1 0 100%;min-width:0;max-width:none;max-height:none;padding:6px 0 2px;border:0;border-top:1px dashed var(--bd);border-radius:0;box-shadow:none;background:none;display:flex;flex-wrap:nowrap;gap:12px;align-items:center;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+#bar #mn[hidden],#bar #mn>div[hidden]{display:none}
+#bar #mn>div{display:flex;gap:6px;align-items:center;flex:none}
+#bar #mn button{flex:none;width:auto;max-width:none;height:32px;padding:0 10px;text-align:center;border:1px solid var(--bd);border-radius:7px;background:var(--pn)}
+#bar #mn button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+#bar #mn button.tg.on::after{content:none}
+#bar #mn h4{margin:0 0 0 4px;flex:none;white-space:nowrap}
+#bar #mn label{margin:0;padding:0 2px;white-space:nowrap}
+#acn,#asp{width:64px}
+/* 設定面板與背景影片 */
+#bgv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#bgv[hidden]{display:none}
+#sp{position:fixed;z-index:40;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));width:min(340px,calc(100vw - 16px));max-height:calc(100vh - 120px);max-height:calc(100dvh - 120px);overflow:auto;padding:8px 10px 10px;background:var(--pn);background:color-mix(in srgb,var(--pn) 96%,transparent);border:1px solid var(--bd);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.25);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+#sp[hidden],.hu #sp,#sp [hidden]{display:none!important}
+#sp .hd{display:flex;align-items:center;justify-content:space-between;font-weight:600}
+#sp .hd button{width:28px;height:28px;padding:0}
+#sp h4{margin:10px 0 4px}
+#sp .r{display:flex;align-items:center;gap:8px;margin:4px 0;min-height:28px}
+#sp .r label{display:flex;align-items:center;gap:6px;margin:0}
+#sp .ln{flex:none;width:56px;color:var(--mu)}
+#sp input[type=range]{flex:1;min-width:0;height:28px;margin:0;accent-color:var(--ac)}
+#sp input[type=checkbox]{width:18px;height:18px;margin:0;accent-color:var(--ac)}
+#sp output{flex:none;width:44px;text-align:right;font-variant-numeric:tabular-nums}
+#sp select{flex:1;min-width:0}
+#sp .sg{display:flex;gap:4px;margin:4px 0 6px}
+#sp .sg button{flex:1 1 0;min-width:0;padding:0 4px}
+#sp .sw{display:flex;gap:6px;flex:1;min-width:0}
+#sp .sw button{width:24px;height:24px;padding:0;border-radius:50%}
+#sp .sw button[aria-pressed=true]{outline:2px solid var(--ac);outline-offset:1px}
+#sp input[type=color]{width:40px;height:28px;flex:none}
+#sp .fn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mu)}
+#sp .nt{margin:2px 0 0;font-size:12px;color:var(--mu)}
+#sp .rs{width:100%;margin-top:10px}
+#sp input:disabled{opacity:.4}
+#sp button:focus-visible,#sp input:focus-visible,#sp select:focus-visible,#stb:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="bar">
+<button data-m="add">新增</button><button data-m="ed">編輯</button><button data-m="sk">草圖</button><button data-m="vw">視角</button><button data-m="ds">顯示</button><button data-m="pj">專案</button><button id="stb" aria-haspopup="dialog" aria-expanded="false">設定</button><span id="as"></span>
+</div>
+<div id="vp"><video id="bgv" muted loop autoplay playsinline hidden></video><canvas id="cv"></canvas><div id="hint"></div><canvas id="gz"></canvas><button id="lbtn" aria-label="燈光" title="燈光">💡</button><button id="mvbtn" aria-label="移動模式" title="移動模式">✥</button><button id="rtbtn" aria-label="旋轉模式" title="旋轉模式">⟳</button><div id="lp" hidden><div id="lh"><div id="lt"></div><button id="lx" aria-label="關閉">✕</button></div><div id="lb"></div></div></div>
+<div id="side"><div id="tree"></div><div id="props"></div></div>
+</div>
+<button id="sh">顯示</button><input id="fi" type="file" hidden><input id="ti" type="file" accept="image/*" hidden>
+<div id="sp" role="dialog" aria-label="設定" hidden>
+<div class="hd"><span>設定</span><button id="sx" aria-label="關閉">✕</button></div>
+<h4>右上角 3D 座標軸</h4>
+<div class="r"><label><input type="checkbox" id="gon" checked>顯示座標軸</label></div>
+<div class="r"><span class="ln">透明度</span><input type="range" id="gop" min="10" max="100" step="5" value="100"><output id="gov">100%</output></div>
+<div class="r"><span class="ln">大小</span><input type="range" id="gsz" min="60" max="160" step="4" value="96"><output id="gsv">96</output></div>
+<h4>建模背景</h4>
+<div class="sg"><button data-bm="def">預設</button><button data-bm="color">純色</button><button data-bm="image">圖片</button><button data-bm="video">影片</button></div>
+<div class="r" data-bp="color"><span class="ln">顏色</span><span class="sw" id="bsw"></span><input type="color" id="bcl" value="#dfe6ee" aria-label="自訂背景顏色"></div>
+<div class="r" data-bp="image"><button id="bpi">選擇圖片…</button><span class="fn" id="bin"></span></div>
+<div class="r" data-bp="video"><button id="bpv">選擇影片…</button><span class="fn" id="bvn"></span></div>
+<div class="r" data-bp="image video"><span class="ln">顯示方式</span><select id="bfit"><option value="cover">填滿（裁切邊緣）</option><option value="contain">完整顯示</option></select></div>
+<div class="nt" data-bp="video">影片會靜音並重複播放；重新整理後需重新選擇影片。</div>
+<button id="sr" class="rs">全部還原預設</button>
+</div>
+<input id="bfi" type="file" accept="image/*" hidden><input id="bfv" type="file" accept="video/*" hidden>
+<div id="mn" hidden>
+<div data-g="add"><h4>基本體</h4><button data-a="box">▣ 方塊</button><button data-a="cyl">⬭ 圓柱</button><button data-a="sph">● 球體</button><button data-a="cone">▲ 圓錐</button><h4>進階體</h4><button data-a="tor">◎ 圓環（Torus）</button><button data-a="pyr">△ 角錐</button><button data-a="pip">◯ 管狀體（Pipe）</button><h4>正多面體</h4><label>種類<select id="py"><option value="4">正四面體</option><option value="6">正六面體</option><option value="8">正八面體</option><option value="12">正十二面體</option><option value="20">正二十面體</option></select></label><button data-a="ply">⬡ 新增正多面體</button><h4>貼圖</h4><button id="tx">🖼 匯入貼圖（套用到所選特徵）</button></div>
+<div data-g="ed" hidden><button id="ud" class="tg">↶ 復原</button><button id="rd" class="tg">↷ 重做</button><button id="mvm">✥ 移動模式（拖曳 XYZ 箭頭）</button><button id="rtm">⟳ 旋轉模式（拖曳 XYZ 圓環）</button><button id="dp">⧉ 複製所選特徵 (Ctrl+D)</button><button id="rn">✎ 重新命名所選特徵 (F2)</button><button id="bu2">⊕ 聯集（先選主體，再點選另一特徵）</button><button id="bs2">⊖ 切除（先選主體，再點選刀具）</button><button id="bi2">∩ 交集（先選主體，再點選另一特徵）</button><button id="mir">⇋ 鏡像複製</button><label>鏡像面<select id="mpl"><option value="0">YZ 面（X 反向）</option><option value="1">XZ 面（Y 反向）</option><option value="2">XY 面（Z 反向）</option></select></label><button id="arr">▦ 線性陣列</button><label>軸向<select id="aax"><option value="0">X</option><option value="1">Y</option><option value="2">Z</option></select></label><label>數量<input type="number" id="acn" value="3" min="2" max="20" step="1"></label><label>間距<input type="number" id="asp" value="50" step="1"></label><label>移動吸附<select id="msn"><option value="0.1">0.1 mm</option><option value="1">1 mm</option><option value="5">5 mm</option><option value="10">10 mm</option></select></label></div>
+<div data-g="sk" hidden><button id="sk">開始草圖</button><label>基準面<select id="pl"><option value="front">前視基準面</option><option value="top">上視基準面</option><option value="right">右視基準面</option></select></label><label>草圖工具<select id="tl"><option value="r">矩形</option><option value="c">圓形</option></select></label></div>
+<div data-g="vw" hidden><button data-v="front">前視圖</button><button data-v="top">上視圖</button><button data-v="right">右視圖</button><button data-v="iso">等角視圖</button><button data-v="fit">縮放至全部</button><button id="tt" class="tg">⟲ 自動旋轉展示</button></div>
+<div data-g="ds" hidden><button id="wf" class="tg">線框顯示</button><button id="gd" class="tg on">顯示格線</button><button id="sa">👁 全部顯示特徵</button><button id="ha">🚫 全部隱藏特徵</button><button id="ms">📏 量測距離（M）</button><button id="hd">隱藏介面</button></div>
+<div data-g="pj" hidden><button id="im">匯入專案／模型</button><button id="ep">存專案（.json）</button><button id="nw">🗋 新專案（可復原）</button><button id="e3">匯出 STL/OBJ（.zip）</button><button id="shot">📷 截圖（PNG）</button></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),cl=(v,a,b)=>Math.min(b,Math.max(a,v)),cv=$('#cv'),vp=$('#vp');
+const R=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+R.setPixelRatio(Math.min(devicePixelRatio,2));
+const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(45,1,.1,5000);
+const HL=new THREE.HemisphereLight(0xffffff,0x667788,.95);S.add(HL);
+const DL=new THREE.DirectionalLight(0xffffff,.8);DL.position.set(80,160,120);S.add(DL);
+const PT=new THREE.PointLight(0xfff1d6,0,0,1);PT.position.set(60,80,60);S.add(PT);
+S.add(new THREE.AxesHelper(50));
+const G0=new THREE.GridHelper(300,30,0x7f8ea3,0x7f8ea3);G0.material.transparent=true;G0.material.opacity=.35;S.add(G0);
+const SP=new THREE.Group(),SG=new THREE.GridHelper(300,60,0x1a73e8,0x1a73e8);
+SG.rotation.x=Math.PI/2;SG.material.transparent=true;SG.material.opacity=.4;
+const HP=new THREE.Mesh(new THREE.PlaneGeometry(600,600),new THREE.MeshBasicMaterial({visible:false,side:THREE.DoubleSide}));
+SP.add(SG,HP);SP.visible=false;S.add(SP);
+const grp=new THREE.Group();S.add(grp);
+
+/* 相機（自製軌道控制） */
+let th=.8,ph=1,rad=180;const tg=new THREE.Vector3(0,15,0);
+function cam(){C.position.set(tg.x+rad*Math.sin(ph)*Math.sin(th),tg.y+rad*Math.cos(ph),tg.z+rad*Math.sin(ph)*Math.cos(th));C.lookAt(tg);gz()}
+function pan(dx,dy){C.updateMatrix();const k=rad*.0017,r=new THREE.Vector3().setFromMatrixColumn(C.matrix,0),u=new THREE.Vector3().setFromMatrixColumn(C.matrix,1);tg.addScaledVector(r,-dx*k).addScaledVector(u,dy*k)}
+const VW={front:[0,Math.PI/2],top:[0,.001],right:[Math.PI/2,Math.PI/2],iso:[.8,1]};
+function view(k){[th,ph]=VW[k];cam()}
+new ResizeObserver(()=>{const w=vp.clientWidth,h=vp.clientHeight;if(!w||!h)return;R.setSize(w,h,false);C.aspect=w/h;C.updateProjectionMatrix()}).observe(vp);
+function loop(){if(tt&&!P.size&&!sk){th-=.006;cam()}mvUpdate();rtUpdate();R.render(S,C);requestAnimationFrame(loop)}/* 於腳本末端啟動 */
+
+/* 特徵資料 */
+const NM={box:'方塊',cyl:'圓柱',sph:'球體',cone:'圓錐',ext:'伸長凸台',tor:'圓環',pyr:'角錐',pip:'管狀體',ply:'正多面體',mesh:'匯入網格'},PLN={4:'正四面體',6:'正六面體',8:'正八面體',12:'正十二面體',20:'正二十面體'},IC={box:'▣',cyl:'⬭',sph:'●',cone:'▲',tor:'◎',pyr:'△',pip:'◯',ply:'⬡',ext:'⬒',mesh:'◇'},esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const PAL=[0x8fa8c4,0xc49a6c,0x7fb69e,0xb58fc4,0xd4a5a5,0xa8b86f];
+const DEF={box:{w:40,h:30,d:30},cyl:{r:15,h:40},sph:{r:20},cone:{r:20,h:40},tor:{R:25,r:8},pyr:{r:25,h:40,n:4},pip:{r:20,t:4,h:40},ply:{r:25,k:12}};
+const DM={box:[['w','寬'],['h','高'],['d','深']],cyl:[['r','半徑'],['h','高']],cone:[['r','底半徑'],['h','高']],sph:[['r','半徑']],tor:[['R','環半徑'],['r','管半徑']],pyr:[['r','底外接圓半徑'],['h','高'],['n','邊數（3–32）']],pip:[['r','外半徑'],['t','壁厚'],['h','高']],ply:[['r','外接球半徑'],['k','面數（4/6/8/12/20）']],mesh:[['s','縮放']]};
+const PL={front:[0,0,'前視基準面'],top:[-Math.PI/2,0,'上視基準面'],right:[0,Math.PI/2,'右視基準面']};
+/* 材質庫：密度(g/cm³)、外觀(顏色／金屬度／粗糙度／環境反射強度)、程序紋理(x)與紋理尺寸(s, mm) */
+const DR=7.85,MGR=[
+ ['鋼材',['s4140','s4150','s416r','s8620','tool','s304','s316','ci']],
+ ['鋁／鈦／鎂合金',['a7075','a6061','a5052','ti','mg']],
+ ['複合材料／聚合物',['gfn','cfrp','kev']],
+ ['木材',['wal','mpl','lam','oak','pin','chy','ply','bam']],
+ ['銅、鉛與鍍層鋼',['brs','pb','cu','cs']],
+ ['光學／紅外材料',['sap','ge']],
+ ['橡膠與彈性體',['fkm','pu','sil','nr','cr','epdm','foam']],
+ ['貴金屬與其他金屬',['au','ag','pt','ni','zn','sn','w','inc']],
+ ['工程塑膠',['abs','pla','pa6','pom','pc','pmma','pp','hd','pvc','ptfe','peek']],
+ ['玻璃／陶瓷／石材',['gl','qz','al2o3','zro2','sic','con','gra','mar']],
+ ['其他',['lea','crd','ice','wtr']],
+ ['表面處理與塗層',['dlc','pmn','pzn','cer','cth']]],
+MAT={
+ s4140:{n:'4140 鉻鉬鋼',d:7.85,c:0x8b929b,mt:.85,rg:.38,ei:1.2,t:'AISI 4140 鉻鉬合金鋼：約 7.85'},
+ s4150:{n:'4150 鉻鉬釩鋼',d:7.85,c:0x6e747c,mt:.8,rg:.5,ei:1.2,t:'4150（含鉻鉬釩類）：約 7.85'},
+ s416r:{n:'416R 不鏽鋼',d:7.75,c:0xc3c8ce,mt:1,rg:.25,ei:1.2,t:'416R 易切削不鏽鋼：約 7.75'},
+ s8620:{n:'8620 碳鋼',d:7.85,c:0x7b8087,mt:.8,rg:.45,ei:1.2,t:'8620 滲碳用低合金鋼：約 7.85'},
+ tool:{n:'工具鋼',d:7.8,c:0x5d646c,mt:.9,rg:.32,ei:1.2,t:'依鋼種約 7.7–8.2（D2 7.70、A2 7.86、M2 8.16），可自行改密度'},
+ a7075:{n:'7075-T6 鋁合金',d:2.81,c:0xc9cdd2,mt:.9,rg:.38,ei:1.2,t:'7075-T6：約 2.81'},
+ a6061:{n:'6061-T6 鋁合金',d:2.7,c:0xd2d6db,mt:.9,rg:.42,ei:1.2,t:'6061-T6：約 2.70'},
+ ti:{n:'鈦合金',d:4.43,c:0xa39f9a,mt:.9,rg:.42,ei:1.2,t:'Ti-6Al-4V：約 4.43'},
+ gfn:{n:'玻璃纖維增強尼龍',d:1.36,c:0x2e3135,mt:0,rg:.7,ei:.45,t:'PA66-GF30 約 1.36；GF50 約 1.55'},
+ cfrp:{n:'碳纖維複合材料',d:1.55,c:0x5c626b,mt:.1,rg:.3,ei:.6,x:'cf',s:32,t:'碳纖維層板：約 1.5–1.6（依纖維含量）'},
+ kev:{n:'凱芙拉',d:1.38,c:0xe0bd3e,mt:0,rg:.55,ei:.45,x:'kv',s:40,t:'纖維 1.44；與樹脂複合後約 1.3–1.4'},
+ wal:{n:'核桃木',d:.61,c:0x80573c,mt:0,rg:.6,ei:.4,x:'wal',s:80,t:'黑核桃木（氣乾）：約 0.61'},
+ mpl:{n:'楓木與樺木',d:.7,c:0xdcbf92,mt:0,rg:.6,ei:.4,x:'mpl',s:80,t:'硬楓約 0.70；樺木約 0.61–0.71'},
+ lam:{n:'層壓木',d:.8,c:0xbf9360,mt:0,rg:.55,ei:.4,x:'lam',s:80,t:'一般層壓木約 0.7–0.9；樹脂浸漬層壓可達 1.3'},
+ brs:{n:'黃銅',d:8.5,c:0xc9a24b,mt:1,rg:.3,ei:1.2,t:'C260 約 8.53、C360 約 8.50'},
+ pb:{n:'鉛與鉛銻合金',d:11,c:0x6f737a,mt:.8,rg:.6,ei:1.1,t:'純鉛 11.34；鉛銻合金（3–6% Sb）約 10.9–11.1'},
+ cu:{n:'紫銅/覆銅甲',d:8.9,c:0xc06a3f,mt:1,rg:.3,ei:1.2,t:'純銅 8.96；覆銅／銅合金約 8.8–8.96'},
+ cs:{n:'塗漆鋼 / 覆銅鋼',d:7.85,c:0xa8683f,mt:.5,rg:.4,ei:1,t:'鋼芯為主，塗層／銅層可忽略：約 7.85（可用顏色欄改成塗漆顏色）'},
+ sap:{n:'藍寶石玻璃',d:3.98,c:0xbcd6f0,mt:0,rg:.04,ei:1.7,o:.4,t:'單晶藍寶石（Al₂O₃）：約 3.98；透明、莫氏硬度 9（預設不透明度 0.4，可於下方調整）'},
+ ge:{n:'鍺',d:5.32,c:0x6a7076,mt:1,rg:.16,ei:1.4,t:'單晶鍺（Ge）：約 5.32；紅外光學材料，可見光下不透明、呈深灰鏡面金屬光澤'},
+ fkm:{n:'氟橡膠（FKM）',d:1.85,c:0x2a2623,mt:0,rg:.82,ei:.3,t:'FKM（Viton 類）：約 1.80–1.90，依氟含量與配方而異'},
+ pu:{n:'聚氨酯（PU）',d:1.2,c:0xe28b32,mt:0,rg:.4,ei:.5,t:'澆注／熱塑聚氨酯（PU／TPU）：約 1.05–1.25；發泡 PU 遠低於此，請自行改密度'},
+ sil:{n:'矽膠（矽橡膠）',d:1.15,c:0xe4e7e5,mt:0,rg:.55,ei:.4,t:'固態矽橡膠（VMQ）：約 1.1–1.3，含填料可更高；發泡矽膠請自行改密度'},
+ s304:{n:'304 不鏽鋼',d:7.93,c:0xb9bec4,mt:1,rg:0.3,ei:1.2,t:'304（18-8）：約 7.93'},
+ s316:{n:'316L 不鏽鋼',d:7.98,c:0xaeb4ba,mt:1,rg:0.32,ei:1.2,t:'316L 耐蝕不鏽鋼：約 7.98'},
+ ci:{n:'鑄鐵',d:7.2,c:0x4e5359,mt:0.7,rg:0.6,ei:1,t:'灰鑄鐵約 7.0–7.3；球墨鑄鐵約 7.1'},
+ a5052:{n:'5052 鋁合金',d:2.68,c:0xcfd3d8,mt:0.9,rg:0.4,ei:1.2,t:'5052：約 2.68'},
+ mg:{n:'AZ91D 鎂合金',d:1.81,c:0xb4b8bb,mt:0.85,rg:0.45,ei:1.2,t:'AZ91D：約 1.81（極輕的結構金屬）'},
+ au:{n:'金',d:19.32,c:0xf0c04a,mt:1,rg:0.2,ei:1.3,t:'純金：約 19.32'},
+ ag:{n:'銀',d:10.49,c:0xdcdde0,mt:1,rg:0.15,ei:1.3,t:'純銀：約 10.49'},
+ pt:{n:'鉑（白金）',d:21.45,c:0xcfd2d6,mt:1,rg:0.2,ei:1.3,t:'純鉑：約 21.45'},
+ ni:{n:'鎳',d:8.9,c:0xb3b6b8,mt:1,rg:0.28,ei:1.2,t:'純鎳：約 8.90'},
+ zn:{n:'鋅',d:7.14,c:0xaab3ba,mt:0.9,rg:0.4,ei:1.1,t:'純鋅：約 7.14'},
+ sn:{n:'錫',d:7.31,c:0xc5c8cb,mt:1,rg:0.3,ei:1.2,t:'純錫：約 7.31'},
+ w:{n:'鎢',d:19.25,c:0x6d7075,mt:0.9,rg:0.35,ei:1.2,t:'純鎢：約 19.25'},
+ inc:{n:'Inconel 718 超合金',d:8.19,c:0x9aa0a6,mt:0.9,rg:0.38,ei:1.2,t:'Inconel 718：約 8.19'},
+ abs:{n:'ABS',d:1.05,c:0xe9e6dc,mt:0,rg:0.45,ei:0.4,t:'ABS：約 1.03–1.07'},
+ pla:{n:'PLA',d:1.24,c:0xf2f0ea,mt:0,rg:0.5,ei:0.4,t:'PLA（3D 列印常用）：約 1.24'},
+ pa6:{n:'尼龍 PA6',d:1.14,c:0xe8e3d3,mt:0,rg:0.55,ei:0.4,t:'PA6：約 1.14'},
+ pom:{n:'POM（賽鋼）',d:1.41,c:0xf5f5f2,mt:0,rg:0.4,ei:0.45,t:'POM-C/H：約 1.41'},
+ pc:{n:'聚碳酸酯 PC',d:1.2,c:0xd4e4ee,mt:0,rg:0.1,ei:0.8,o:0.5,t:'PC：約 1.20；透明（預設不透明度 0.5）'},
+ pmma:{n:'壓克力 PMMA',d:1.18,c:0xdcecf5,mt:0,rg:0.06,ei:1.2,o:0.45,t:'PMMA：約 1.18；透明（預設不透明度 0.45）'},
+ pp:{n:'聚丙烯 PP',d:0.91,c:0xe4e6e8,mt:0,rg:0.5,ei:0.4,t:'PP：約 0.90–0.91'},
+ hd:{n:'高密度聚乙烯 HDPE',d:0.95,c:0xeceef0,mt:0,rg:0.55,ei:0.4,t:'HDPE：約 0.94–0.97'},
+ pvc:{n:'PVC',d:1.4,c:0xc9ced3,mt:0,rg:0.45,ei:0.4,t:'硬質 PVC：約 1.38–1.45'},
+ ptfe:{n:'鐵氟龍 PTFE',d:2.2,c:0xf3f3f1,mt:0,rg:0.5,ei:0.4,t:'PTFE：約 2.2'},
+ peek:{n:'PEEK',d:1.3,c:0xb89f6e,mt:0,rg:0.45,ei:0.45,t:'PEEK：約 1.30'},
+ gl:{n:'玻璃',d:2.5,c:0xcfe8e4,mt:0,rg:0.03,ei:1.6,o:0.35,t:'鈉鈣玻璃：約 2.5；透明（預設不透明度 0.35）'},
+ qz:{n:'石英玻璃',d:2.2,c:0xe6eef2,mt:0,rg:0.02,ei:1.6,o:0.3,t:'熔融石英：約 2.20；透明（預設不透明度 0.3）'},
+ al2o3:{n:'氧化鋁陶瓷',d:3.95,c:0xf0eee8,mt:0,rg:0.35,ei:0.7,t:'Al₂O₃ 96–99%：約 3.7–3.95'},
+ zro2:{n:'氧化鋯陶瓷',d:6.05,c:0xf4f1ea,mt:0,rg:0.3,ei:0.7,t:'Y-TZP：約 6.05'},
+ sic:{n:'碳化矽',d:3.21,c:0x2f3338,mt:0.2,rg:0.35,ei:0.9,t:'SiC：約 3.21'},
+ con:{n:'混凝土',d:2.4,c:0x9a9a96,mt:0,rg:0.95,ei:0.2,t:'普通混凝土：約 2.3–2.5'},
+ gra:{n:'花崗岩',d:2.7,c:0x8a8d90,mt:0,rg:0.6,ei:0.4,t:'花崗岩：約 2.6–2.8'},
+ mar:{n:'大理石',d:2.7,c:0xe9e6e1,mt:0,rg:0.25,ei:0.6,t:'大理石：約 2.6–2.8'},
+ oak:{n:'橡木',d:0.75,c:0xb58a55,mt:0,rg:0.6,ei:0.4,x:'oak',s:80,t:'橡木（氣乾）：約 0.75'},
+ pin:{n:'松木',d:0.5,c:0xe0bd7c,mt:0,rg:0.65,ei:0.4,x:'pin',s:80,t:'松木（氣乾）：約 0.4–0.6'},
+ chy:{n:'櫻桃木',d:0.58,c:0xa65e3c,mt:0,rg:0.55,ei:0.4,x:'mpl',s:80,t:'黑櫻桃木：約 0.58'},
+ ply:{n:'夾板（合板）',d:0.6,c:0xd9b98a,mt:0,rg:0.65,ei:0.4,x:'lam',s:60,t:'一般夾板：約 0.5–0.7'},
+ bam:{n:'竹材',d:0.7,c:0xd8c27a,mt:0,rg:0.5,ei:0.4,x:'lam',s:50,t:'竹材：約 0.6–0.8'},
+ nr:{n:'天然橡膠（NR）',d:0.93,c:0x5b4636,mt:0,rg:0.8,ei:0.3,t:'NR：約 0.92–0.95'},
+ cr:{n:'氯丁橡膠（CR）',d:1.23,c:0x25272a,mt:0,rg:0.8,ei:0.3,t:'Neoprene：約 1.23'},
+ epdm:{n:'EPDM 橡膠',d:1.15,c:0x1f2123,mt:0,rg:0.85,ei:0.3,t:'EPDM：約 1.15'},
+ foam:{n:'EVA 發泡棉',d:0.15,c:0x3d7fc0,mt:0,rg:0.9,ei:0.2,t:'EVA 發泡：約 0.05–0.3，依發泡倍率而異，可自行改密度'},
+ lea:{n:'皮革',d:0.86,c:0x6b4a33,mt:0,rg:0.65,ei:0.3,t:'皮革：約 0.8–1.0'},
+ crd:{n:'紙板',d:0.69,c:0xc9a875,mt:0,rg:0.9,ei:0.2,t:'瓦楞／紙板：約 0.5–0.9'},
+ ice:{n:'冰',d:0.917,c:0xcfe6f5,mt:0,rg:0.05,ei:1.4,o:0.5,t:'冰：約 0.917；半透明（預設不透明度 0.5）'},
+ wtr:{n:'水',d:1,c:0x6fb4e6,mt:0,rg:0.02,ei:1.5,o:0.45,t:'水（4°C）：1.00；半透明（預設不透明度 0.45）'},
+ dlc:{n:'類鑽碳（DLC）塗層',d:7.85,c:0x25282c,mt:.85,rg:.2,ei:1.2,t:'DLC 膜厚僅約 1–5 μm，質量以基材鋼 7.85 計（膜本身約 1.8–3.3）；深灰近黑的鏡面金屬光澤，可自行改密度'},
+ pmn:{n:'磷酸錳處理（錳系磷化）',d:7.85,c:0x2f3331,mt:.25,rg:.88,ei:.5,t:'磷化層僅數 μm，質量以基材鋼 7.85 計；深灰黑霧面，耐磨、可儲油'},
+ pzn:{n:'磷酸鋅處理（鋅系磷化）',d:7.85,c:0x7a7e80,mt:.3,rg:.85,ei:.5,t:'磷化層僅數 μm，質量以基材鋼 7.85 計；灰色霧面結晶層，常作塗裝底層'},
+ cer:{n:'陶瓷塗層（Cerakote 類）',d:7.85,c:0x6b7058,mt:.1,rg:.7,ei:.45,t:'聚合物陶瓷塗層，膜厚約 25–50 μm，質量以基材鋼 7.85 計（鋁基材請改 2.7）；霧面，可用顏色欄改色'},
+ cth:{n:'熱噴塗陶瓷塗層（Al₂O₃／YSZ）',d:7.85,c:0xe6e1d4,mt:0,rg:.55,ei:.6,t:'電漿熱噴塗氧化鋁／氧化鋯，厚約 0.1–0.5 mm，質量以基材 7.85 計，可自行改密度；米白霧面'}};
+/* 環境反射貼圖：讓金屬材質有東西可反射（失敗時自動降低金屬度，避免變黑） */
+let ENV=null;
+try{const es=new THREE.Scene(),sg=new THREE.SphereGeometry(50,32,16),ps=sg.attributes.position,cc=[];
+ for(let i=0;i<ps.count;i++){const t=ps.getY(i)/100+.5,v=.35+.65*Math.pow(t,1.1);cc.push(v,v*1.02,v*1.06)}
+ sg.setAttribute('color',new THREE.Float32BufferAttribute(cc,3));
+ es.add(new THREE.Mesh(sg,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide})));
+ [[0,45,0,30,2,30,2],[-40,15,20,2,25,30,1.6],[40,10,-15,2,22,26,1.3],[0,8,-45,40,18,2,1.2]].forEach(([x,y,z,w,h,d,k])=>{const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshBasicMaterial({color:new THREE.Color(k,k,k)}));b.position.set(x,y,z);es.add(b)});
+ const pm=new THREE.PMREMGenerator(R);ENV=pm.fromScene(es,.02).texture;pm.dispose()}catch(_){ENV=null}
+const rho=f=>{const r=+f.rho;return r>0?r:MAT[f.mat]?MAT[f.mat].d:DR};
+/* 依法線主軸做「世界尺寸」方框投影 UV，使木紋／編織紋理不隨零件大小被拉伸 */
+function wUV(g,tile){if(!g.attributes.normal)g.computeVertexNormals();
+ const p=g.attributes.position,n=g.attributes.normal,uv=new Float32Array(p.count*2);
+ for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),ax=Math.abs(n.getX(i)),ay=Math.abs(n.getY(i)),az=Math.abs(n.getZ(i));
+  let u,v;if(ax>=ay&&ax>=az){u=z;v=y}else if(ay>=az){u=x;v=z}else{u=x;v=y}
+  uv[2*i]=u/tile;uv[2*i+1]=v/tile}
+ g.setAttribute('uv',new THREE.BufferAttribute(uv,2))}
+/* 程序紋理（灰階，與材質顏色相乘；256px 可無縫平鋪）：wal/mpl 木紋、lam 層壓、cf 碳纖斜紋、kv 凱芙拉平紋 */
+const MTX={};
+function mTex(k){if(MTX[k])return MTX[k];
+ const N=256,T=Math.PI*2,c=document.createElement('canvas');c.width=c.height=N;
+ const cx=c.getContext('2d'),im=cx.createImageData(N,N),a=im.data;
+ let sd=k.split('').reduce((q,ch)=>q*31+ch.charCodeAt(0),7)%2147483646+1;
+ const rd=()=>(sd=sd*16807%2147483647)/2147483647,
+  RR=Array.from({length:N},()=>rd()),RX=Array.from({length:N},()=>rd()),LY=Array.from({length:8},()=>.86+.14*rd()),
+  wd=(x,y,m,dp,wv)=>{const s=m*y/N+wv*(.3*Math.sin(T*2*x/N+1.3)+.18*Math.sin(T*(5*x+3*y)/N+.7)+.1*Math.sin(T*(11*x-2*y)/N)),r=s-Math.floor(s);
+   return 1-dp*Math.pow(Math.sin(Math.PI*r),3)-.07*RR[y]-.03*rd()};
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){let t;
+  if(k=='wal')t=wd(x,y,9,.4,1);
+  else if(k=='mpl')t=wd(x,y,7,.14,.8);
+  else if(k=='lam')t=LY[Math.floor(y/32)]*wd(x,y,5,.14,.7)*((y%32)<2?.6:1);
+  else if(k=='oak')t=wd(x,y,6,.3,1.1);
+  else if(k=='pin')t=wd(x,y,10,.34,.9);
+  else{const u=Math.floor(x/16),v=Math.floor(y/16),fx=(x%16)/16,fy=(y%16)/16,tw=k=='cf'?((u+v)%4<2):((u+v)%2<1),
+    sh=tw?Math.sin(Math.PI*fx):Math.sin(Math.PI*fy),ed=tw?Math.sin(Math.PI*fy):Math.sin(Math.PI*fx),fb=tw?RX[x]:RR[y];
+   t=k=='cf'?(.28+.72*sh*(.72+.28*ed))*(tw?1:.9)*(.93+.07*fb):(.55+.45*sh*(.7+.3*ed))*(tw?1:.93)*(.88+.12*fb)}
+  const q=Math.max(0,Math.min(255,Math.round(t*255))),i=(y*N+x)*4;a[i]=a[i+1]=a[i+2]=q;a[i+3]=255}
+ cx.putImageData(im,0,0);
+ const tx=new THREE.CanvasTexture(c);tx.wrapS=tx.wrapT=THREE.RepeatWrapping;tx.anisotropy=4;return MTX[k]=tx}
+/* 屬性面板的材質區塊與切換 */
+function matUI(f){const M=MAT[f.mat];
+ return '<h4>材質與密度</h4><label>材質<select data-k="mat"><option value="">預設（鋼）</option>'+MGR.map(([g,ks])=>`<optgroup label="${g}">`+ks.map(k=>`<option value="${k}"${k==f.mat?' selected':''}>${esc(MAT[k].n)}</option>`).join('')+'</optgroup>').join('')+`</select></label><label>密度 g/cm³<input type="number" step="0.01" min="0.01" data-k="rho" value="${+rho(f).toFixed(3)}"></label><div class="mu mnote">${M?esc(M.t):'未選材質：以一般鋼 7.85 g/cm³ 計算'}</div>`}
+function setMat(f,k){if(k&&!MAT[k])return;
+ const ob=MAT[f.mat];if(ob&&ob.o!=null&&f.o==ob.o)delete f.o;
+ if(k){f.mat=k;f.c=MAT[k].c;if(MAT[k].o!=null)f.o=MAT[k].o}else delete f.mat;
+ delete f.rho;build(f);ui();push();
+ msg(k?`已套用材質：${MAT[k].n}（密度 ${MAT[k].d} g/cm³）`:'已改回預設材質（鋼 7.85 g/cm³）')}
+
+let F=[],sel=null,nid=1,wf=false,sk=false,drag=null,pv=null;
+
+function geo(f){
+ const p=f.p,q=k=>Math.max(.1,+p[k]||.1);let g;
+ if(f.t=='box'){g=new THREE.BoxGeometry(q('w'),q('h'),q('d'));g.translate(0,q('h')/2,0)}
+ else if(f.t=='cyl'){g=new THREE.CylinderGeometry(q('r'),q('r'),q('h'),48);g.translate(0,q('h')/2,0)}
+ else if(f.t=='cone'){g=new THREE.CylinderGeometry(0,q('r'),q('h'),48);g.translate(0,q('h')/2,0)}
+ else if(f.t=='sph'){g=new THREE.SphereGeometry(q('r'),48,32);g.translate(0,q('r'),0)}
+ else if(f.t=='tor'){const R=q('R'),r=q('r');g=new THREE.TorusGeometry(R,r,24,64);g.rotateX(Math.PI/2);g.translate(0,r,0)}
+ else if(f.t=='pyr'){const n=cl(Math.round(+p.n||4),3,32),h=q('h');g=new THREE.ConeGeometry(q('r'),h,n,1);g.rotateY(Math.PI/n);g.translate(0,h/2,0);g=g.toNonIndexed();g.computeVertexNormals()}
+ else if(f.t=='pip'){const ro=q('r'),t=Math.min(Math.max(.1,+p.t||.1),ro-.1),ri=ro-t,h=q('h');
+  g=new THREE.LatheGeometry([[ri,0],[ro,0],[ro,h],[ri,h],[ri,0]].map(a=>new THREE.Vector2(a[0],a[1])),64).toNonIndexed();
+  const a=g.attributes.position.array;g.setAttribute('normal',new THREE.BufferAttribute(cNorm(a,a.length),3))}
+ else if(f.t=='ply'){const k=[4,6,8,12,20].reduce((a,b)=>Math.abs(b-(+p.k||12))<Math.abs(a-(+p.k||12))?b:a),r=q('r');
+  g=k==4?new THREE.TetrahedronGeometry(r):k==6?new THREE.BoxGeometry(2*r/Math.sqrt(3),2*r/Math.sqrt(3),2*r/Math.sqrt(3)):k==8?new THREE.OctahedronGeometry(r):k==12?new THREE.DodecahedronGeometry(r):new THREE.IcosahedronGeometry(r);
+  g.translate(0,r,0)}
+ else if(f.t=='mesh'){const s=Math.max(1e-4,+p.s||1),n=p.v.length-p.v.length%9,a=new Float32Array(n);for(let i=0;i<n;i++)a[i]=p.v[i]*s;g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(a,3));if(p.b)g.setAttribute('normal',new THREE.BufferAttribute(cNorm(p.v,n),3));else g.computeVertexNormals()}
+ else{
+  const s=new THREE.Shape();
+  if(p.k=='r'){s.moveTo(0,0);s.lineTo(q('w'),0);s.lineTo(q('w'),q('h'));s.lineTo(0,q('h'));s.closePath()}
+  else s.absarc(0,0,q('r'),0,Math.PI*2,false);
+  const d=Math.max(.5,+p.d||.5),m=p.k=='r'?Math.min(q('w'),q('h')):q('r')*2,b=Math.max(0,Math.min(+p.fl||0,d/2-.1,m/2-.1));
+  g=new THREE.ExtrudeGeometry(s,{depth:d-2*b,bevelEnabled:b>0,bevelThickness:b,bevelSize:b,bevelOffset:-b,bevelSegments:4,curveSegments:48});
+  if(b>0)g.translate(0,0,b);
+ }
+ return g}
+function vol(g){const p=g.attributes.position,ix=g.index,a=new THREE.Vector3(),b=new THREE.Vector3(),c=new THREE.Vector3(),n=ix?ix.count:p.count;let v=0;
+ for(let i=0;i<n;i+=3){const t=k=>ix?ix.getX(i+k):i+k;a.fromBufferAttribute(p,t(0));b.fromBufferAttribute(p,t(1));c.fromBufferAttribute(p,t(2));v+=a.dot(b.cross(c))/6}
+ return Math.abs(v)}
+function hl(f){f.m.material.emissive.set(f.id==sel?0x2a4f86:0)}
+function build(f){
+ if(f.m){grp.remove(f.m);f.m.geometry.dispose();f.m.material.dispose();f.m.children[0].geometry.dispose()}
+ const MR=MAT[f.mat],g=geo(f),m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:f.c,metalness:MR?(ENV?MR.mt:Math.min(MR.mt,.55)):.25,roughness:MR?MR.rg:.5,side:f.t=='mesh'?THREE.DoubleSide:THREE.FrontSide,wireframe:wf,transparent:(f.o||1)<1,opacity:f.o||1,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1}));
+ m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g,28),new THREE.LineBasicMaterial({color:0x18222e})));
+ m.position.fromArray(f.pos);m.rotation.set(f.rot[0],f.rot[1],f.rot[2]||0);m.visible=f.vis;m.userData.id=f.id;if(MR&&ENV){m.material.envMap=ENV;m.material.envMapIntensity=MR.ei}
+ if(typeof f.tex=='string'&&f.tex.startsWith('data:image/')){m.material.map=gTex(f);m.material.color.setHex(0xffffff)}else if(MR&&MR.x){wUV(g,MR.s);m.material.map=mTex(MR.x)}
+ f.m=m;f.v=vol(g);grp.add(m);hl(f)}
+function add(t,p,o={}){const f=Object.assign({id:nid,t,p,pos:[0,0,0],rot:[0,0],c:PAL[(nid-1)%PAL.length],vis:true,name:NM[t]+nid},o);nid++;F.push(f);build(f);select(f.id);push()}
+function select(id){sel=id;F.forEach(hl);ui()}
+
+/* 介面：特徵樹 + 屬性 */
+function ui(){
+ $('#tree').innerHTML='<h4>特徵樹（點基準面開始草圖）</h4>'+['front','top','right'].map(k=>`<div class="it pl" data-pl="${k}">▱ ${PL[k][2]}</div>`).join('')+F.map(f=>`<div class="it${f.id==sel?' on':''}" data-id="${f.id}"><span>${IC[f.t]} ${esc(f.name)}</span><b data-v="${f.id}">${f.vis?'👁':'🚫'}</b></div>`).join('');
+ const f=F.find(x=>x.id==sel);let h='<h4>屬性</h4>';
+ if(f){
+  const D=f.t=='ext'?[...(f.p.k=='r'?[['w','寬'],['h','高']]:[['r','半徑']]),['d','伸長深度'],['fl','圓角']]:DM[f.t];
+  const row=(l,k,v)=>`<label>${l}<input type="number" step="1" data-k="${k}" value="${+(+v).toFixed(2)}"></label>`;
+  h+=`<div class="bo"><button id="bu" title="聯集：按下後再點選要合併的特徵">⊕ 聯集</button><button id="bs" title="切除：按下後再點選要切除的刀具特徵">⊖ 切除</button><button id="bi" title="交集：按下後再點選要取交集的特徵，只保留兩者重疊的部分">∩ 交集</button></div><label>名稱<input type="text" data-k="name" maxlength="40" value="${esc(f.name)}"></label>`+D.map(([k,l])=>row(l,'p.'+k,f.p[k]||0)).join('')+'<h4>位置（基準點）</h4>'+['X','Y','Z'].map((l,i)=>row(l,'pos.'+i,f.pos[i])).join('')+matUI(f)+`<label>顏色<input type="color" data-k="c" value="#${f.c.toString(16).padStart(6,'0')}"></label><label>透明度<input type="range" min="0.1" max="1" step="0.05" data-k="o" value="${f.o||1}"></label><button id="gnd" style="width:100%;margin-top:6px">⤓ 貼齊地面（Y=0）</button>${f.tex?'<button id="rtx" style="width:100%;margin-top:6px">✕ 移除貼圖</button>':''}${f.t=='mesh'&&!f.p.b?'<button id="zup">Z 軸朝上轉正</button>':''}<button id="del">刪除特徵</button>`;
+ }else h+='<div class="mu">點選模型或特徵樹項目以編輯尺寸</div>';
+ h+=clipUI();$('#props').innerHTML=h+'<div id="mass"></div>';mass()}
+const fm=g=>g>=1000?(g/1000).toFixed(3)+' kg':g.toFixed(1)+' g';
+function mass(){const L=F.filter(f=>f.vis);if(!L.length){$('#mass').innerHTML='';return}
+ let v=0,w=0;const bb=new THREE.Box3(),by={};
+ L.forEach(f=>{const g=f.v/1000*rho(f);v+=f.v;w+=g;bb.expandByObject(f.m);const k=MAT[f.mat]?MAT[f.mat].n:'預設鋼';by[k]=(by[k]||0)+g});
+ const z=bb.getSize(new THREE.Vector3()),ks=Object.keys(by),one=ks.length==1&&new Set(L.map(rho)).size==1;
+ $('#mass').innerHTML=`<h4>質量特性（${one?esc(ks[0])+' '+(+rho(L[0]).toFixed(3))+' g/cm³':'依各特徵材質／密度'}）</h4>體積 ${(v/1000).toFixed(2)} cm³<br>質量 ${fm(w)}`+(ks.length>1?'<br>'+ks.map(k=>`<span class="mu">${esc(k)}　${fm(by[k])}</span>`).join('<br>'):'')+`<br>外框 ${z.x.toFixed(1)}×${z.y.toFixed(1)}×${z.z.toFixed(1)} mm`}
+$('#tree').onclick=e=>{const t=e.target,i=t.closest('[data-id]'),p=t.closest('[data-pl]');
+ if(t.dataset.v){const f=F.find(x=>x.id==t.dataset.v);f.vis=!f.vis;f.m.visible=f.vis;ui();push();return}
+ if(p)startSk(p.dataset.pl);else if(i){const k=+i.dataset.id;bo?bApply(k):select(k)}};
+$('#props').oninput=e=>{const f=F.find(x=>x.id==sel),t=e.target,k=t.dataset.k;if(!f||!k)return;
+ if(k=='name'){f.name=t.value;const s=$('#tree .it.on span');if(s)s.textContent=IC[f.t]+' '+f.name;return}
+ if(k=='c'){f.c=parseInt(t.value.slice(1),16);f.m.material.color.setHex(f.c);return}
+ if(k=='o'){f.o=+t.value;f.m.material.transparent=f.o<1;f.m.material.opacity=f.o;f.m.material.needsUpdate=true;return}
+ if(k=='mat')return;/* 材質下拉於 change 事件處理，避免 iOS 滾輪選單被重繪中斷 */
+ if(k=='rho'){const v=+t.value;if(v>0)f.rho=v;else delete f.rho;mass();return}
+ const[a,b]=k.split('.');(a=='pos'?f.pos:f.p)[b]=+t.value||0;build(f);mass()};
+$('#props').onclick=e=>{const f=F.find(x=>x.id==sel),i=e.target.id;if(!f)return;
+ if(i=='del'){grp.remove(f.m);F=F.filter(x=>x!==f);select(null);push()}
+ else if(i=='rtx'){delete f.tex;build(f);ui();push()}
+ else if(i=='gnd'){f.m.updateMatrixWorld(true);const y=new THREE.Box3().setFromObject(f.m).min.y;f.pos[1]=+(f.pos[1]-y).toFixed(3);f.m.position.fromArray(f.pos);ui();push()}
+ else if(i=='zup'){f.rot[0]=f.rot[0]?0:-Math.PI/2;build(f);mass();push()}
+ else if(i=='bu')bStart('u');else if(i=='bs')bStart('s');else if(i=='bi')bStart('i')};
+$('#mn').onclick=e=>{const t=e.target.closest('button');if(!t)return;
+ if(t.id=='ud')return goto(hi-1);if(t.id=='rd')return goto(hi+1);if(t.id=='dp')return dup();if(t.id=='sa'||t.id=='ha'){const v=t.id=='sa';F.forEach(f=>{f.vis=v;f.m.visible=v});ui();push();return}if(t.id=='nw'){load({F:[]});return msg('已建立新專案（可按復原還原）')}if(t.id=='rn')return sel?ren(sel):msg('請先選取要改名的特徵');if(t.id=='bu2')return bStart('u');if(t.id=='bs2')return bStart('s');if(t.id=='bi2')return bStart('i');
+ if(t.dataset.a){endSk();const a=t.dataset.a,p={...DEF[a]},o={};if(a=='ply'){p.k=+$('#py').value;o.name=PLN[p.k]+nid}add(a,p,o);return}
+ if(t.dataset.v){t.dataset.v=='fit'?fit():view(t.dataset.v);return}
+ if(t.id=='sk')sk?endSk():startSk($('#pl').value);
+ if(t.id=='wf'){wf=!wf;t.classList.toggle('on',wf);F.forEach(f=>f.m.material.wireframe=wf)}
+ if(t.id=='gd'){const on=t.classList.toggle('on');G0.visible=on&&!sk}};
+$('#pl').onchange=()=>{if(sk)startSk($('#pl').value)};$('#tl').onchange=()=>hint();
+addEventListener('keydown',e=>{if(/INPUT|SELECT/.test(e.target.tagName))return;if(e.key=='Escape'){endSk();bCancel();mvSet(false);rtSet(false);mSet(false)}if((e.key=='Delete'||e.key=='Backspace')&&$('#del'))$('#del').click()});
+
+/* 特徵改名：雙擊特徵樹項目、F2、選單或屬性欄「名稱」 */
+function ren(id){const f=F.find(x=>x.id==id),s=$(`#tree [data-id="${id}"] span`);if(!f||!s)return;
+ const i=document.createElement('input');i.value=f.name;i.maxLength=40;i.className='rn';s.replaceChildren(i);i.focus();i.select();
+ let d=0;const ok=y=>{if(d)return;d=1;const n=i.value.trim();if(y&&n&&n!=f.name){f.name=n;push()}ui()};
+ i.onkeydown=e=>{e.stopPropagation();if(e.key=='Enter')ok(1);else if(e.key=='Escape')ok(0)};i.onblur=()=>ok(1);i.onclick=e=>e.stopPropagation()}
+$('#tree').ondblclick=e=>{const i=e.target.closest('[data-id]');if(i&&!e.target.dataset.v)ren(+i.dataset.id)};
+addEventListener('keydown',e=>{if(e.key=='F2'&&sel&&!/INPUT|SELECT/.test(e.target.tagName)){e.preventDefault();ren(sel)}});
+/* 草圖 → 伸長 */
+function hint(){$('#hint').textContent=bo?bHint():ms?'量測模式：依序點選模型表面兩點，再點一次重新量測・Esc 結束':sk?`${PL[$('#pl').value][2]}草圖：拖曳繪製${$('#tl').value=='r'?'矩形':'圓形'}，放開後自動伸長凸台`:rtOn?'旋轉模式：點選模型，拖曳 X／Y／Z 圓環旋轉・拖曳其他處旋轉視角':mm?'移動模式：點選模型，拖曳 X／Y／Z 箭頭移動・拖曳其他處旋轉視角':'拖曳旋轉・雙指縮放／平移・點選物件編輯・G 移動 R 旋轉 M 量測 F 全部 方向鍵微移'}
+function startSk(k){mvSet(false);rtSet(false);bo=null;sk=true;$('#pl').value=k;SP.rotation.set(PL[k][0],PL[k][1],0);SP.updateMatrixWorld(true);SP.visible=true;G0.visible=false;tg.set(0,0,0);view(k);$('#sk').textContent='結束草圖';$('#sk').classList.add('on');$('[data-m=sk]').classList.add('on');hint()}
+function endSk(){sk=false;cancelDraw();SP.visible=false;G0.visible=$('#gd').classList.contains('on');$('#sk').textContent='開始草圖';$('#sk').classList.remove('on');$('[data-m=sk]').classList.remove('on');hint()}
+const sn=v=>Math.round(v/5)*5,RC=new THREE.Raycaster(),M=new THREE.Vector2();
+function ray(e){const r=vp.getBoundingClientRect();M.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);RC.setFromCamera(M,C)}
+function onPl(e){ray(e);const h=RC.intersectObject(HP)[0];if(!h)return null;const q=SP.worldToLocal(h.point.clone());return[sn(q.x),sn(q.y)]}
+function cancelDraw(){drag=null;if(pv){SP.remove(pv);pv.geometry.dispose();pv=null}}
+function preview(){const{a,b}=drag,pts=[];
+ if($('#tl').value=='r')pts.push(a[0],a[1],0,b[0],a[1],0,b[0],b[1],0,a[0],b[1],0);
+ else{const r=Math.hypot(b[0]-a[0],b[1]-a[1]);for(let i=0;i<64;i++){const t=i/64*Math.PI*2;pts.push(a[0]+r*Math.cos(t),a[1]+r*Math.sin(t),0)}}
+ if(!pv){pv=new THREE.LineLoop(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0xff7a00}));pv.frustumCulled=false;SP.add(pv)}
+ pv.geometry.setAttribute('position',new THREE.Float32BufferAttribute(pts,3))}
+function commit(){const{a,b}=drag;cancelDraw();let p,o;
+ if($('#tl').value=='r'){const w=Math.abs(b[0]-a[0]),h=Math.abs(b[1]-a[1]);if(w<5||h<5)return;p={k:'r',w,h,d:20,fl:0};o=[Math.min(a[0],b[0]),Math.min(a[1],b[1])]}
+ else{const r=Math.hypot(b[0]-a[0],b[1]-a[1]);if(r<5)return;p={k:'c',r,d:20,fl:0};o=a}
+ const wp=SP.localToWorld(new THREE.Vector3(o[0],o[1],0)).toArray(),rot=[SP.rotation.x,SP.rotation.y];
+ endSk();add('ext',p,{pos:wp,rot});view('iso')}
+
+/* 指標操作：旋轉／平移／縮放／選取／繪圖 */
+const P=new Map();let mv=0,pd=0;const d2=()=>{const[a,b]=[...P.values()];return Math.hypot(a[0]-b[0],a[1]-b[1])||1};
+function pick(e){ray(e);const h=RC.intersectObjects(F.filter(f=>f.vis).map(f=>f.m),false)[0];const k=h?h.object.userData.id:null;if(ms)return mPick(h);bo?bApply(k):select(k)}
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);P.set(e.pointerId,[e.clientX,e.clientY]);mv=0;
+ if(P.size==2){cancelDraw();mvEnd();rtEnd();pd=d2()}else if(mvStart(e)){}else if(rtStart(e)){}else if(sk&&e.button==0){const a=onPl(e);if(a)drag={a,b:a,id:e.pointerId}}});
+cv.addEventListener('pointermove',e=>{const o=P.get(e.pointerId);if(!o)return;const dx=e.clientX-o[0],dy=e.clientY-o[1];P.set(e.pointerId,[e.clientX,e.clientY]);mv+=Math.abs(dx)+Math.abs(dy);
+ if(P.size==2){const d=d2();rad=cl(rad*pd/d,5,2500);pd=d;pan(dx/2,dy/2)}
+ else if(md&&md.id==e.pointerId)mvDrag(e);
+ else if(rtD&&rtD.id==e.pointerId)rtDrag(e);
+ else if(drag){const b=onPl(e);if(b){drag.b=b;preview()}}
+ else if(e.buttons==2||e.shiftKey)pan(dx,dy);
+ else if(!sk){th-=dx*.008;ph=cl(ph-dy*.008,.02,3.12)}
+ cam()});
+cv.addEventListener('pointerup',e=>{if(!P.delete(e.pointerId))return;pd=0;
+ if(md&&md.id==e.pointerId)mvEnd();
+ else if(rtD&&rtD.id==e.pointerId)rtEnd();
+ else if(drag&&drag.id==e.pointerId){if(drag.a[0]!=drag.b[0]||drag.a[1]!=drag.b[1])commit();else cancelDraw()}
+ else if(!sk&&mv<6&&!P.size)pick(e)});
+cv.addEventListener('pointercancel',e=>{P.delete(e.pointerId);cancelDraw();if(md&&md.id==e.pointerId)mvEnd();if(rtD&&rtD.id==e.pointerId)rtEnd()});
+cv.addEventListener('wheel',e=>{e.preventDefault();rad=cl(rad*(e.deltaY>0?1.1:.9),5,2500);cam()},{passive:false});
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+
+/* 匯入／匯出 */
+let DLs=null,mt;
+function msg(t){clearTimeout(mt);$('#hint').textContent=t;mt=setTimeout(hint,3500)}
+;(window.claude?claude.use('downloads'):Promise.resolve(null)).catch(()=>null).then(d=>{DLs=d;if(d)document.querySelectorAll('.ex').forEach(b=>b.hidden=false)});
+async function save(name,data){if(!DLs)return msg('此環境無法下載檔案');try{await DLs.save({filename:name,data});msg('已儲存 '+name)}catch(e){if(!e||e.code!='declined')msg('無法儲存：'+((e&&(e.message||e.code))||'未知錯誤'))}}
+function fit(){const L=F.filter(f=>f.vis);if(!L.length)return;const bb=new THREE.Box3();L.forEach(f=>bb.expandByObject(f.m));const s=bb.getSize(new THREE.Vector3()).length();bb.getCenter(tg);rad=cl(s*1.6||180,20,2500);cam()}
+function tris(){const o=[],v=new THREE.Vector3();
+ F.filter(f=>f.vis).forEach(f=>{f.m.updateMatrixWorld(true);const g=f.m.geometry,p=g.attributes.position,ix=g.index,n=ix?ix.count:p.count;
+  for(let i=0;i<n;i++){v.fromBufferAttribute(p,ix?ix.getX(i):i).applyMatrix4(f.m.matrixWorld);o.push(v.x,v.y,v.z)}});
+ return o}
+function stl(T){const n=T.length/9,d=new DataView(new ArrayBuffer(84+50*n)),a=new THREE.Vector3(),b=new THREE.Vector3(),c=new THREE.Vector3();d.setUint32(80,n,true);
+ for(let i=0;i<n;i++){const o=84+50*i,t=i*9;a.set(T[t],T[t+1],T[t+2]);b.set(T[t+3],T[t+4],T[t+5]);c.set(T[t+6],T[t+7],T[t+8]);
+  const m=b.sub(a).cross(c.sub(a)).normalize();
+  [m.x,m.y,m.z,...T.slice(t,t+9)].forEach((x,j)=>d.setFloat32(o+4*j,x||0,true))}
+ return d.buffer}
+function obj(T){const r=x=>+x.toFixed(4);let s='# mini-cad\n';for(let i=0;i<T.length;i+=3)s+=`v ${r(T[i])} ${r(T[i+1])} ${r(T[i+2])}\n`;for(let i=1;i<=T.length/3;i+=3)s+=`f ${i} ${i+1} ${i+2}\n`;return s}
+function pStl(b){const n=b.byteLength>=84?new DataView(b).getUint32(80,true):0,r=[],q=x=>+(+x).toFixed(4);
+ if(n&&b.byteLength==84+50*n){const d=new DataView(b);for(let i=0;i<n;i++)for(let j=0;j<9;j++)r.push(q(d.getFloat32(96+50*i+4*j,true)))}
+ else{const t=new TextDecoder().decode(b),re=/vertex\s+(\S+)\s+(\S+)\s+(\S+)/g;let m;while(m=re.exec(t))r.push(q(m[1]),q(m[2]),q(m[3]))}
+ return r}
+function pObj(t){const V=[],r=[];for(const l of t.split('\n')){const s=l.trim().split(/\s+/);
+ if(s[0]=='v')V.push(s.slice(1,4).map(x=>+(+x).toFixed(4)));
+ else if(s[0]=='f'){const ix=s.slice(1).map(x=>{const i=parseInt(x);return i<0?V.length+i:i-1});
+  for(let k=1;k<ix.length-1;k++)[ix[0],ix[k],ix[k+1]].forEach(i=>V[i]&&r.push(...V[i]))}}
+ return r}
+function load(o){if(!o||!Array.isArray(o.F))throw 0;bo=null;endSk();if(o.L)setL(o.L);F.forEach(f=>grp.remove(f.m));F=[];nid=1;
+ o.F.forEach(r=>{if(!NM[r.t]||!r.p||(r.t=='mesh'&&!Array.isArray(r.p.v)))return;
+  const f={...r,id:nid++,name:String(r.name||NM[r.t]),vis:r.vis!==false,c:+r.c||0x8fa8c4,pos:Array.isArray(r.pos)?r.pos.slice(0,3).map(Number):[0,0,0],rot:Array.isArray(r.rot)?r.rot.slice(0,3).map(Number):[0,0]};if(!MAT[f.mat])delete f.mat;if(+f.rho>0)f.rho=+f.rho;else delete f.rho;F.push(f);build(f)});
+ select(null);fit();push()}
+$('#ep').onclick=()=>save('mini-cad-project.json',JSON.stringify({v:1,F:F.map(({m,v,...r})=>r),L:LD}));
+$('#e3').onclick=async()=>{const T=tris();if(!T.length)return msg('沒有可匯出的可見特徵');
+ try{const z=new JSZip();z.file('model.stl',stl(T));z.file('model.obj',obj(T));await save('model.zip',await z.generateAsync({type:'blob'}))}catch(_){msg('無法建立壓縮檔')}};
+const mn=$('#mn');let mo=null;$('#bar').appendChild(mn);
+const cm=()=>{mn.hidden=true;if(mo)mo.classList.remove('op');mo=null};
+$('#bar').onclick=e=>{const t=e.target.closest('button[data-m]');if(!t)return;e.stopPropagation();
+ if(mo===t)return cm();cm();mo=t;t.classList.add('op');
+ mn.querySelectorAll('[data-g]').forEach(g=>g.hidden=g.dataset.g!=t.dataset.m);mn.hidden=false;
+ const r=t.getBoundingClientRect();mn.style.top=r.bottom+4+'px';mn.style.left=Math.max(6,Math.min(r.left,innerWidth-mn.offsetWidth-6))+'px'};
+/* 分類工具列常駐顯示：再點一次分類即可收合 */
+
+$('#im').onclick=()=>$('#fi').click();
+$('#hd').onclick=()=>{cm();lpOpen(false);document.body.classList.add('hu')};$('#sh').onclick=()=>document.body.classList.remove('hu');
+$('#fi').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const x=f.name.split('.').pop().toLowerCase();
+ try{const b=await f.arrayBuffer();
+  if(x=='json')load(JSON.parse(new TextDecoder().decode(b)));
+  else if(x=='stl'||x=='obj'){const v=x=='stl'?pStl(b):pObj(new TextDecoder().decode(b));if(!v.length)throw 0;endSk();add('mesh',{v,s:1},{name:f.name.replace(/\.[^.]+$/,'')});fit()}
+  else return msg('僅支援 .json、.stl、.obj');
+  msg('已匯入 '+f.name)}catch(_){msg('無法讀取此檔案')}};
+
+/* 復原／重做：歷史快照（網格頂點以參考共用，不複製） */
+let H=[],hi=-1;
+const sg=()=>JSON.stringify([nid,F.map(f=>[f.id,f.t,f.name,f.c,f.vis,f.pos,f.rot,f.t=='mesh'?[f.p.s,f.p.v.length]:f.p,f.o,f.tex?f.tex.length+f.tex.slice(-12):0,f.mat,f.rho])]),cp=r=>({...r,p:{...r.p},pos:r.pos.slice(),rot:r.rot.slice()});
+function hs(){$('#ud').disabled=hi<1;$('#rd').disabled=hi>=H.length-1}
+function push(){const k=sg();if(H[hi]&&H[hi].k==k)return;
+ H=H.slice(0,hi+1);H.push({k,n:nid,s:sel,F:F.map(({m,v,...r})=>cp(r))});if(H.length>40)H.shift();hi=H.length-1;hs();asv()}
+function goto(i){if(i<0||i>=H.length||i==hi)return;hi=i;const o=H[i];endSk();
+ F.forEach(f=>{grp.remove(f.m);f.m.geometry.dispose();f.m.children[0].geometry.dispose()});
+ F=o.F.map(cp);F.forEach(f=>build(f));nid=o.n;select(o.s);hs();asv()}
+function dup(){const f=F.find(x=>x.id==sel);if(!f)return msg('請先選取要複製的特徵');
+ add(f.t,{...f.p},{name:f.name+' 複製',c:f.c,pos:[f.pos[0]+10,f.pos[1],f.pos[2]+10],rot:f.rot.slice(),o:f.o,tex:f.tex,mat:f.mat,rho:f.rho})}
+$('#props').onchange=e=>{const t=e.target,k=t.dataset&&t.dataset.k;if(!k)return;if(k=='mat'){const f=F.find(x=>x.id==sel);if(f)setMat(f,t.value);return}push()};
+addEventListener('keydown',e=>{if(/INPUT|SELECT/.test(e.target.tagName)||!(e.ctrlKey||e.metaKey))return;const k=e.key.toLowerCase();
+ if(k=='z'||k=='y'){e.preventDefault();goto(hi+(k=='y'||e.shiftKey?1:-1))}
+ else if(k=='d'){e.preventDefault();dup()}});
+
+/* 右上角 XYZ 座標軸：X 紅・Y 綠・Z 藍（跟隨相機旋轉；點軸端切換視角，拖曳可旋轉） */
+const gc=$('#gz'),gx=gc.getContext('2d'),GS=96,gd=Math.min(devicePixelRatio||1,2),GA=[['X',[1,0,0],'#ff3352'],['Y',[0,1,0],'#8bdc00'],['Z',[0,0,1],'#2890ff']];
+gc.width=gc.height=GS*gd;let GH=[],gp=null,gm=0,gk=1;
+function gz(){
+ if(gc.hidden)return;
+ const q=C.quaternion.clone().invert(),L=[];
+ GA.forEach(([n,a,c])=>[1,-1].forEach(k=>{const w=new THREE.Vector3(a[0]*k,a[1]*k,a[2]*k).applyQuaternion(q);L.push({n,c,k,d:[a[0]*k,a[1]*k,a[2]*k],x:GS/2+w.x*33,y:GS/2-w.y*33,z:w.z})}));
+ L.sort((u,v)=>u.z-v.z);GH=L;
+ gx.setTransform(gd*gk,0,0,gd*gk,0,0);gx.clearRect(0,0,GS,GS);
+ gx.fillStyle='rgba(128,138,150,.16)';gx.beginPath();gx.arc(GS/2,GS/2,GS/2-2,0,7);gx.fill();
+ gx.lineCap='round';gx.font='bold 11px system-ui,sans-serif';gx.textAlign='center';gx.textBaseline='middle';
+ L.forEach(p=>{
+  if(p.k>0){gx.strokeStyle=p.c;gx.lineWidth=2.5;gx.beginPath();gx.moveTo(GS/2,GS/2);gx.lineTo(p.x,p.y);gx.stroke()}
+  gx.beginPath();gx.arc(p.x,p.y,p.k>0?10:7,0,7);
+  if(p.k>0){gx.fillStyle=p.c;gx.fill();gx.fillStyle='#10161d';gx.fillText(p.n,p.x,p.y+.5)}
+  else{gx.globalAlpha=.55;gx.fillStyle=p.c;gx.fill();gx.globalAlpha=1;gx.strokeStyle=p.c;gx.lineWidth=1.5;gx.stroke()}})}
+function gh(e){const r=gc.getBoundingClientRect(),x=(e.clientX-r.left)*GS/r.width,y=(e.clientY-r.top)*GS/r.height;
+ for(let i=GH.length-1;i>=0;i--){const p=GH[i];if(Math.hypot(p.x-x,p.y-y)<=(p.k>0?12:9))return p}return null}
+gc.addEventListener('pointerdown',e=>{gc.setPointerCapture(e.pointerId);gp=[e.clientX,e.clientY];gm=0});
+gc.addEventListener('pointermove',e=>{if(!gp)return;const dx=e.clientX-gp[0],dy=e.clientY-gp[1];gp=[e.clientX,e.clientY];gm+=Math.abs(dx)+Math.abs(dy);
+ if(gm>=6&&!sk){th-=dx*.01;ph=cl(ph-dy*.01,.02,3.12);cam()}});
+gc.addEventListener('pointerup',e=>{if(!gp)return;gp=null;if(gm<6){const p=gh(e);if(p){const[x,y,z]=p.d;if(Math.abs(y)<.99)th=Math.atan2(x,z);ph=cl(Math.acos(y),.001,Math.PI-.001);cam()}}});
+gc.addEventListener('pointercancel',()=>{gp=null});
+
+/* 移動模式：選取特徵後顯示 X 紅・Y 綠・Z 藍 三軸箭頭，拖曳箭頭沿該軸移動（以 0.1 為單位）；拖曳其他地方仍可自由旋轉視角 */
+let mm=false,md=null;
+const MG=new THREE.Group(),MC=[0xff3352,0x8bdc00,0x2890ff],MX=[new THREE.Vector3(1,0,0),new THREE.Vector3(0,1,0),new THREE.Vector3(0,0,1)],MT=[],MB=new THREE.Box3(),ML=1.06,
+ mvM=c=>new THREE.MeshBasicMaterial({color:c,depthTest:false,depthWrite:false,transparent:true});
+MC.forEach((c,i)=>{const m=mvM(c),a=new THREE.Group(),sh=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,.8,8),m),tp=new THREE.Mesh(new THREE.ConeGeometry(.1,.26,16),m);
+ sh.position.y=.4;tp.position.y=.93;sh.renderOrder=tp.renderOrder=999;a.add(sh,tp);
+ if(i==0)a.rotation.z=-Math.PI/2;else if(i==2)a.rotation.x=Math.PI/2;
+ MG.add(a);MT.push(m)});
+const mvDot=new THREE.Mesh(new THREE.SphereGeometry(.06,12,8),mvM(0xffffff));mvDot.renderOrder=999;MG.add(mvDot);
+MG.visible=false;S.add(MG);
+const mvF=()=>mm&&!sk&&!bo?(F.find(x=>x.id==sel&&x.vis&&x.m)||null):null;
+function mvColor(){MT.forEach((m,i)=>m.color.setHex(md&&md.i==i?0xffd21f:MC[i]))}
+/* 每幀：箭頭置於所選特徵外框中心，並依相機距離縮放成固定螢幕大小 */
+function mvUpdate(){const f=mvF();MG.visible=!!f;if(!f)return;
+ MB.setFromObject(f.m).getCenter(MG.position);
+ const h=vp.clientHeight||400,px=cl(h*.22,64,110);
+ MG.scale.setScalar(Math.max(1e-3,C.position.distanceTo(MG.position)*2*Math.tan(C.fov*Math.PI/360)*px/h))}
+/* 滑鼠射線與軸線的最近點（沿軸參數）；軸幾乎正對視線時回傳 null */
+function mvT(o,D){const r=RC.ray,b=D.dot(r.direction),den=1-b*b;if(den<.02)return null;
+ const w=o.clone().sub(r.origin);return(b*r.direction.dot(w)-D.dot(w))/den}
+/* 以螢幕像素距離判斷抓到哪一軸（觸控範圍較大） */
+function mvStart(e){const f=mvF();if(!f||e.button!=0)return false;
+ C.updateMatrixWorld();
+ const r=vp.getBoundingClientRect(),X=e.clientX-r.left,Y=e.clientY-r.top,o=MG.position.clone(),s=MG.scale.x*ML,tr=e.pointerType=='touch'?28:16,
+  pr=v=>{const n=v.clone().project(C);return[(n.x+1)/2*r.width,(1-n.y)/2*r.height]},a=pr(o),L=[];
+ MX.forEach((D,i)=>{const b=pr(o.clone().addScaledVector(D,s)),vx=b[0]-a[0],vy=b[1]-a[1],l2=vx*vx+vy*vy,
+  t=l2?cl(((X-a[0])*vx+(Y-a[1])*vy)/l2,0,1):0,d=Math.hypot(X-a[0]-vx*t,Y-a[1]-vy*t);if(d<=tr)L.push([d,i])});
+ L.sort((u,v)=>u[0]-v[0]);ray(e);
+ for(const[,i]of L){const t0=mvT(o,MX[i]);if(t0==null)continue;
+  md={id:e.pointerId,f,i,o,D:MX[i],t0,p0:f.pos.slice(),moved:false};mvColor();return true}
+ if(L.length)msg('此軸正對視線，請先旋轉視角再拖曳');return false}
+function mvDrag(e){const d=md;C.updateMatrixWorld();ray(e);const t=mvT(d.o,d.D);if(t==null)return;
+ const s=Math.round((t-d.t0)/msS)*msS,v=+(d.p0[d.i]+s).toFixed(3);if(v==d.f.pos[d.i])return;
+ d.f.pos[d.i]=v;d.f.m.position.fromArray(d.f.pos);d.moved=true;
+ const k=$(`#props [data-k="pos.${d.i}"]`);if(k)k.value=v;
+ $('#hint').textContent=`${'XYZ'[d.i]} 軸移動：${v}（${s>0?'+':''}${s.toFixed(1)}）`}
+function mvEnd(){const d=md;if(!d)return;md=null;mvColor();if(d.moved){mass();push()}hint()}
+function mvSet(on){on=!!on;if(on===mm)return;mm=on;if(on){endSk();bCancel();rtSet(false)}else mvEnd();
+ $('#mvbtn').classList.toggle('on',on);$('#mvm').classList.toggle('on',on);hint()}
+$('#mvbtn').onclick=()=>mvSet(!mm);$('#mvm').onclick=()=>mvSet(!mm);
+
+/* 旋轉模式：選取特徵後顯示 X 紅・Y 綠・Z 藍 三個圓環，拖曳圓環繞世界座標軸旋轉（以 5° 為單位，繞特徵外框中心）；拖曳其他地方仍可旋轉視角 */
+let rtOn=false,rtD=null;
+const rtG=new THREE.Group(),rtM=[],rtR=.85,rtV=new THREE.Vector3();
+MC.forEach((c,i)=>{const m=mvM(c),t=new THREE.Mesh(new THREE.TorusGeometry(rtR,.018,8,72),m);t.renderOrder=999;
+ if(i==0)t.rotation.y=Math.PI/2;else if(i==1)t.rotation.x=Math.PI/2;rtG.add(t);rtM.push(m)});
+rtG.visible=false;S.add(rtG);
+const rtF=()=>rtOn&&!sk&&!bo?(F.find(x=>x.id==sel&&x.vis&&x.m)||null):null;
+function rtPivot(f,out){f.m.updateMatrixWorld(true);const g=f.m.geometry;if(!g.boundingBox)g.computeBoundingBox();return g.boundingBox.getCenter(out).applyMatrix4(f.m.matrixWorld)}
+function rtColor(){rtM.forEach((m,i)=>m.color.setHex(rtD&&rtD.i==i?0xffd21f:MC[i]))}
+function rtUpdate(){const f=rtF();rtG.visible=!!f;if(!f)return;
+ if(rtD)rtG.position.copy(rtD.o);else rtPivot(f,rtG.position);
+ const h=vp.clientHeight||400,px=cl(h*.22,64,110);
+ rtG.scale.setScalar(Math.max(1e-3,C.position.distanceTo(rtG.position)*2*Math.tan(C.fov*Math.PI/360)*px/h))}
+/* 滑鼠射線與圓環所在平面的交點（相對圓心）；平面幾乎與視線平行時回傳 null */
+function rtHit(o,A){const r=RC.ray,dn=r.direction.dot(A);if(Math.abs(dn)<.15)return null;
+ const t=o.clone().sub(r.origin).dot(A)/dn,v=r.origin.clone().addScaledVector(r.direction,t).sub(o);return v.lengthSq()>1e-8?v:null}
+function rtStart(e){const f=rtF();if(!f||e.button!=0)return false;
+ C.updateMatrixWorld();
+ const r=vp.getBoundingClientRect(),X=e.clientX-r.left,Y=e.clientY-r.top,o=rtG.position.clone(),s=rtG.scale.x*rtR,tr=e.pointerType=='touch'?28:16,
+  pr=v=>{const n=v.clone().project(C);return[(n.x+1)/2*r.width,(1-n.y)/2*r.height]},L=[];
+ MX.forEach((A,i)=>{const u=MX[(i+1)%3],w=MX[(i+2)%3];let pp=null,d=1e9;
+  for(let k=0;k<=48;k++){const t=k/48*Math.PI*2,q=pr(o.clone().addScaledVector(u,Math.cos(t)*s).addScaledVector(w,Math.sin(t)*s));
+   if(pp){const vx=q[0]-pp[0],vy=q[1]-pp[1],l2=vx*vx+vy*vy,tt=l2?cl(((X-pp[0])*vx+(Y-pp[1])*vy)/l2,0,1):0;d=Math.min(d,Math.hypot(X-pp[0]-vx*tt,Y-pp[1]-vy*tt))}pp=q}
+  if(d<=tr)L.push([d,i])});
+ L.sort((u,v)=>u[0]-v[0]);ray(e);
+ for(const[,i]of L){const v0=rtHit(o,MX[i]);if(!v0)continue;
+  rtD={id:e.pointerId,f,i,o,A:MX[i],v0:v0.normalize(),q0:new THREE.Quaternion().setFromEuler(new THREE.Euler(f.rot[0],f.rot[1],f.rot[2]||0,'XYZ')),r0:[f.rot[0],f.rot[1],f.rot[2]||0],p0:f.pos.slice(),prev:0,moved:false};rtColor();return true}
+ if(L.length)msg('此圓環幾乎與視線平行，請先旋轉視角再拖曳');return false}
+function rtDrag(e){const d=rtD;C.updateMatrixWorld();ray(e);const v=rtHit(d.o,d.A);if(!v)return;v.normalize();
+ let a=Math.atan2(d.A.dot(d.v0.clone().cross(v)),d.v0.dot(v));
+ while(a-d.prev>Math.PI)a-=2*Math.PI;while(a-d.prev<-Math.PI)a+=2*Math.PI;d.prev=a;
+ const st=Math.PI/36,g=Math.round(a/st)*st,f=d.f;
+ if(g){const dq=new THREE.Quaternion().setFromAxisAngle(d.A,g),eu=new THREE.Euler().setFromQuaternion(dq.clone().multiply(d.q0),'XYZ');
+  f.rot=[eu.x,eu.y,eu.z];f.pos=new THREE.Vector3().fromArray(d.p0).sub(d.o).applyQuaternion(dq).add(d.o).toArray().map(x=>+x.toFixed(3));d.moved=true}
+ else{f.rot=d.r0.slice();f.pos=d.p0.slice()}
+ f.m.rotation.set(f.rot[0],f.rot[1],f.rot[2]);f.m.position.fromArray(f.pos);
+ for(let k=0;k<3;k++){const q=$(`#props [data-k="pos.${k}"]`);if(q)q.value=+f.pos[k].toFixed(2)}
+ const dg=Math.round(g*180/Math.PI);$('#hint').textContent=`${'XYZ'[d.i]} 軸旋轉：${dg>0?'+':''}${dg}°`}
+function rtEnd(){const d=rtD;if(!d)return;rtD=null;rtColor();if(d.moved){mass();push()}hint()}
+function rtSet(on){on=!!on;if(on===rtOn)return;rtOn=on;if(on){endSk();bCancel();mvSet(false)}else rtEnd();
+ $('#rtbtn').classList.toggle('on',on);$('#rtm').classList.toggle('on',on);hint()}
+$('#rtbtn').onclick=()=>rtSet(!rtOn);$('#rtm').onclick=()=>rtSet(!rtOn);
+
+/* 燈光：環境光／主光源／補光燈，可調亮度與顏色（隨自動存檔與專案檔保存） */
+const LN={amb:'環境光',sun:'主光源',pt:'補光燈'},
+ LS={amb:[['i','亮度',0,2,.05]],
+  sun:[['i','亮度',0,3,.05],['az','水平角',0,360,1],['el','仰角',5,90,1]],
+  pt:[['i','亮度',0,4,.05],['x','X 位置',-250,250,1],['y','Y 高度',-100,300,1],['z','Z 位置',-250,250,1]]},
+ LD0=()=>({amb:{on:true,c:0xffffff,i:.95},sun:{on:true,c:0xffffff,i:.8,az:34,el:48},pt:{on:false,c:0xfff1d6,i:1.2,x:60,y:80,z:60}}),
+ LD=LD0(),SW=['#ffffff','#fff1d6','#ffc78a','#ff8a5c','#9ec5ff','#d6a8ff'],GCL=new THREE.Color(0x667788),
+ hx=c=>'#'+c.toString(16).padStart(6,'0'),
+ lf=(p,v)=>p=='i'?(+v).toFixed(2):p=='az'||p=='el'?Math.round(v)+'°':String(Math.round(v));
+let lk='sun';
+function ball(r){const g=new THREE.Group(),m=new THREE.Mesh(new THREE.SphereGeometry(r,20,14),new THREE.MeshBasicMaterial({color:0xffffff}));
+ g.add(m,new THREE.Mesh(new THREE.SphereGeometry(r*1.3,20,14),new THREE.MeshBasicMaterial({color:0x18222e,side:THREE.BackSide})));g.userData.fill=m;return g}
+const LMG=new THREE.Group(),sunMk=ball(5),ptMk=ball(4),sunAr=new THREE.ArrowHelper(new THREE.Vector3(0,-1,0),new THREE.Vector3(),45,0xff9f1a,12,7);
+LMG.add(sunMk,sunAr,ptMk);LMG.visible=false;S.add(LMG);
+function lit(){
+ const a=LD.amb,s=LD.sun,p=LD.pt,az=s.az*Math.PI/180,el=s.el*Math.PI/180;
+ HL.color.setHex(a.c);HL.groundColor.setHex(a.c).multiply(GCL);HL.intensity=a.on?a.i:0;
+ DL.color.setHex(s.c);DL.intensity=s.on?s.i:0;
+ DL.position.set(215*Math.cos(el)*Math.sin(az),215*Math.sin(el),215*Math.cos(el)*Math.cos(az));
+ PT.color.setHex(p.c);PT.intensity=p.on?p.i:0;PT.position.set(p.x,p.y,p.z);
+ const sp=DL.position.clone().setLength(110);
+ sunMk.position.copy(sp);sunAr.position.copy(sp);sunAr.setDirection(sp.clone().negate().normalize());
+ sunMk.userData.fill.material.color.setHex(s.c);
+ ptMk.position.set(p.x,p.y,p.z);ptMk.userData.fill.material.color.setHex(p.c);
+ sunMk.visible=sunAr.visible=lk=='sun'&&s.on;ptMk.visible=lk=='pt'&&p.on}
+function lui(){
+ const d=LD[lk];
+ $('#lt').innerHTML=Object.keys(LN).map(k=>`<button data-t="${k}"${k==lk?' class="on"':''}><i style="background:${LD[k].on?hx(LD[k].c):'transparent'}"></i>${LN[k]}</button>`).join('');
+ $('#lb').innerHTML=`<div class="r"><label><input type="checkbox" data-l="on"${d.on?' checked':''}>開啟</label><button class="g" data-r="1">還原預設</button></div>`
+ +`<div class="r"><span class="ln">顏色</span><span class="sw">${SW.map(c=>`<button data-sw="${c}" style="background:${c}" aria-label="${c}"></button>`).join('')}</span><input type="color" data-l="c" value="${hx(d.c)}"></div>`
+ +LS[lk].map(([p,l,a,b,s])=>`<div class="r"><span class="ln">${l}</span><input type="range" data-l="${p}" min="${a}" max="${b}" step="${s}" value="${d[p]}"><output data-o="${p}">${lf(p,d[p])}</output></div>`).join('');
+ lit()}
+function lpOpen(on){$('#lp').hidden=!on;$('#lbtn').classList.toggle('on',on);LMG.visible=on;if(on)lui()}
+function setL(o){if(!o||typeof o!='object')return;
+ Object.keys(LD).forEach(k=>{const s=o[k];if(!s||typeof s!='object')return;const d=LD[k];
+  if(typeof s.on=='boolean')d.on=s.on;
+  if(s.c!=null&&Number.isFinite(+s.c))d.c=cl(Math.round(+s.c),0,0xffffff);
+  LS[k].forEach(([p,,a,b])=>{if(s[p]!=null&&Number.isFinite(+s[p]))d[p]=cl(+s[p],a,b)})});
+ lit();if(!$('#lp').hidden)lui()}
+$('#lbtn').onclick=()=>lpOpen($('#lp').hidden);
+$('#lp').addEventListener('input',e=>{const t=e.target,p=t.dataset&&t.dataset.l;if(!p)return;const d=LD[lk];
+ d[p]=p=='on'?t.checked:p=='c'?parseInt(t.value.slice(1),16):+t.value;
+ const o=$(`#lb [data-o="${p}"]`);if(o)o.textContent=lf(p,d[p]);
+ const dt=$('#lt .on i');if(dt)dt.style.background=d.on?hx(d.c):'transparent';
+ lit();asv()});
+$('#lp').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.t){lk=b.dataset.t;lui()}
+ else if(b.dataset.sw){LD[lk].c=parseInt(b.dataset.sw.slice(1),16);lui();asv()}
+ else if(b.dataset.r){LD[lk]=LD0()[lk];lui();asv()}
+ else if(b.id=='lx')lpOpen(false)});
+lit();
+
+/* 布林運算：BSP 樹網格 CSG（聯集／切除／交集）；結果烘焙成網格特徵，原兩個特徵被取代（可復原） */
+const BE=1e-4,BMAX=20000;let bo=null,bDL=0;const bT=()=>{if(Date.now()>bDL)throw new Error('timeout')};
+function cTri(a,b,c){const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2];
+ let x=uy*vz-uz*vy,y=uz*vx-ux*vz,z=ux*vy-uy*vx;const l=Math.hypot(x,y,z);if(l<1e-9)return null;x/=l;y/=l;z/=l;
+ return{v:[a,b,c],n:[x,y,z],w:x*a[0]+y*a[1]+z*a[2]}}
+function cSplit(pl,p,cf,cb,f,b){const n=pl.n,T=[];let ty=0;
+ for(const v of p.v){const t=n[0]*v[0]+n[1]*v[1]+n[2]*v[2]-pl.w,k=t<-BE?2:t>BE?1:0;ty|=k;T.push(k)}
+ if(ty==0)(n[0]*p.n[0]+n[1]*p.n[1]+n[2]*p.n[2]>0?cf:cb).push(p);
+ else if(ty==1)f.push(p);else if(ty==2)b.push(p);
+ else{const F1=[],B1=[],m=p.v.length;
+  for(let i=0;i<m;i++){const j=(i+1)%m,ti=T[i],tj=T[j],vi=p.v[i],vj=p.v[j];
+   if(ti!=2)F1.push(vi);if(ti!=1)B1.push(vi);
+   if((ti|tj)==3){const dx=vj[0]-vi[0],dy=vj[1]-vi[1],dz=vj[2]-vi[2],t=(pl.w-(n[0]*vi[0]+n[1]*vi[1]+n[2]*vi[2]))/(n[0]*dx+n[1]*dy+n[2]*dz),v=[vi[0]+dx*t,vi[1]+dy*t,vi[2]+dz*t];F1.push(v);B1.push(v)}}
+  if(F1.length>=3)f.push({v:F1,n:p.n,w:p.w});if(B1.length>=3)b.push({v:B1,n:p.n,w:p.w})}}
+const cNode=()=>({pl:null,f:null,b:null,ps:[]});
+function cBuild(o,ps){const st=[[o,ps]];
+ while(st.length){bT();const[o,ps]=st.pop();if(!ps.length)continue;
+  if(!o.pl)o.pl={n:ps[0].n,w:ps[0].w};
+  const f=[],b=[];for(const p of ps)cSplit(o.pl,p,o.ps,o.ps,f,b);
+  if(f.length){if(!o.f)o.f=cNode();st.push([o.f,f])}
+  if(b.length){if(!o.b)o.b=cNode();st.push([o.b,b])}}}
+function cInv(o){const st=[o];
+ while(st.length){const n=st.pop();
+  for(const p of n.ps){p.v.reverse();p.n=[-p.n[0],-p.n[1],-p.n[2]];p.w=-p.w}
+  if(n.pl)n.pl={n:[-n.pl.n[0],-n.pl.n[1],-n.pl.n[2]],w:-n.pl.w};
+  const t=n.f;n.f=n.b;n.b=t;if(n.f)st.push(n.f);if(n.b)st.push(n.b)}}
+function cClip(o,ps){const out=[],st=[[o,ps]];
+ while(st.length){bT();const[n,ps]=st.pop();
+  if(!n.pl){for(const p of ps)out.push(p);continue}
+  const f=[],b=[];for(const p of ps)cSplit(n.pl,p,f,b,f,b);
+  if(n.f)st.push([n.f,f]);else for(const p of f)out.push(p);
+  if(n.b)st.push([n.b,b])}
+ return out}
+function cClipTo(o,t){const st=[o];while(st.length){const n=st.pop();n.ps=cClip(t,n.ps);if(n.f)st.push(n.f);if(n.b)st.push(n.b)}}
+function cAll(o){const r=[],st=[o];while(st.length){const n=st.pop();for(const p of n.ps)r.push(p);if(n.f)st.push(n.f);if(n.b)st.push(n.b)}return r}
+function cOp(op,A,B){const a=cNode(),b=cNode();cBuild(a,A);cBuild(b,B);
+ if(op=='u'){cClipTo(a,b);cClipTo(b,a);cInv(b);cClipTo(b,a);cInv(b);cBuild(a,cAll(b))}
+ else if(op=='s'){cInv(a);cClipTo(a,b);cClipTo(b,a);cInv(b);cClipTo(b,a);cInv(b);cBuild(a,cAll(b));cInv(a)}
+ else{cInv(a);cClipTo(b,a);cInv(b);cClipTo(a,b);cClipTo(b,a);cBuild(a,cAll(b));cInv(a)}
+ return cAll(a)}
+function cWorld(f){f.m.updateMatrixWorld(true);const g=f.m.geometry,p=g.attributes.position,ix=g.index,n=ix?ix.count:p.count,v=new THREE.Vector3(),o=[];
+ for(let i=0;i<n;i+=3){const t=[];for(let k=0;k<3;k++){v.fromBufferAttribute(p,ix?ix.getX(i+k):i+k).applyMatrix4(f.m.matrixWorld);t.push([v.x,v.y,v.z])}const q=cTri(t[0],t[1],t[2]);if(q)o.push(q)}
+ return o}
+function cTris(P){const o=[],r=x=>Math.round(x*1e3)/1e3;
+ for(const p of P){const v=p.v.map(q=>q.map(r));for(let i=1;i<v.length-1;i++){if(!cTri(v[0],v[i],v[i+1]))continue;o.push(...v[0],...v[i],...v[i+1])}}
+ return o}
+/* 折角平滑法線：夾角 35° 內的相鄰面共用法線，讓圓孔／圓柱側面保持平滑、稜線保持銳利 */
+function cNorm(v,m){const n=m/9,fn=new Float32Array(n*3),un=new Float32Array(n*3),M=new Map(),key=i=>Math.round(v[i]*1e3)+','+Math.round(v[i+1]*1e3)+','+Math.round(v[i+2]*1e3);
+ for(let t=0;t<n;t++){const o=t*9,ux=v[o+3]-v[o],uy=v[o+4]-v[o+1],uz=v[o+5]-v[o+2],wx=v[o+6]-v[o],wy=v[o+7]-v[o+1],wz=v[o+8]-v[o+2],
+  x=uy*wz-uz*wy,y=uz*wx-ux*wz,z=ux*wy-uy*wx,l=Math.hypot(x,y,z)||1;fn[t*3]=x;fn[t*3+1]=y;fn[t*3+2]=z;un[t*3]=x/l;un[t*3+1]=y/l;un[t*3+2]=z/l;
+  for(let c=0;c<3;c++){const k=key(o+c*3);let a=M.get(k);if(!a)M.set(k,a=[]);a.push(t)}}
+ const out=new Float32Array(m),C=Math.cos(35*Math.PI/180);
+ for(let t=0;t<n;t++)for(let c=0;c<3;c++){const L=M.get(key(t*9+c*3));let x=0,y=0,z=0;
+  for(const q of L)if(un[t*3]*un[q*3]+un[t*3+1]*un[q*3+1]+un[t*3+2]*un[q*3+2]>C){x+=fn[q*3];y+=fn[q*3+1];z+=fn[q*3+2]}
+  const l=Math.hypot(x,y,z)||1;out[t*9+c*3]=x/l;out[t*9+c*3+1]=y/l;out[t*9+c*3+2]=z/l}
+ return out}
+const bN=op=>op=='u'?'聯集':op=='s'?'切除':'交集',bHint=()=>{const a=F.find(x=>x.id==bo.a);return `${bN(bo.op)}：已選「${a?a.name:''}」→ 請點選${bo.op=='u'?'要合併的':bo.op=='s'?'要切除的（刀具）':'要取交集的'}特徵・點空白處取消`};
+function bStart(op){const f=F.find(x=>x.id==sel);if(!f)return msg('請先選取主體特徵，再執行'+bN(op));
+ if(F.length<2)return msg('至少需要兩個特徵才能做布林運算');
+ endSk();mvSet(false);rtSet(false);bo={op,a:f.id};hint()}
+function bCancel(){if(bo){bo=null;hint()}}
+const bTc=f=>{const g=f.m.geometry;return (g.index?g.index.count:g.attributes.position.count)/3};
+function bApply(id){const A=bo&&F.find(x=>x.id==bo.a),B=F.find(x=>x.id==id),op=bo&&bo.op;
+ if(!A||id==null){bCancel();return msg('已取消布林運算')}
+ if(!B||B===A)return msg('請點選另一個特徵');
+ if(op!='u'&&!new THREE.Box3().expandByObject(A.m).intersectsBox(new THREE.Box3().expandByObject(B.m)))return msg('兩個特徵沒有相交，無法'+bN(op));
+ if(bTc(A)>BMAX||bTc(B)>BMAX)return msg('特徵面數過多（單一特徵上限 '+BMAX+' 面），無法運算');
+ bo=null;hint();msg(bN(op)+'運算中…');
+ setTimeout(()=>{try{
+  bDL=Date.now()+6000;const T=cTris(cOp(op,cWorld(A),cWorld(B)));
+  if(!T.length)return msg('運算結果為空，已取消');
+  [A,B].forEach(f=>{grp.remove(f.m);f.m.geometry.dispose();f.m.material.dispose();f.m.children[0].geometry.dispose()});
+  F=F.filter(f=>f!==A&&f!==B);
+  add('mesh',{v:T,s:1,b:1},{name:bN(op)+nid,c:A.c,mat:A.mat,rho:A.rho});
+  msg('已完成'+bN(op)+'（原特徵已合併，可按復原還原）')}catch(e){msg(e&&e.message=='timeout'?'運算逾時（面數太多），已取消':'布林運算失敗')}},30)}
+
+
+/* 貼圖：從「新增」匯入圖片，套用到所選特徵（縮圖後以 data URL 存入專案／自動存檔） */
+const TI=new Map();
+function gTex(f){let im=TI.get(f.tex);if(!im){im=new Image();im.src=f.tex;TI.set(f.tex,im)}
+ const t=new THREE.Texture(),ok=()=>{t.image=im;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;t.needsUpdate=true};
+ im.complete&&im.naturalWidth?ok():im.addEventListener('load',ok,{once:true});
+ if(f.t=='ext'){const u=Math.max(1,f.p.k=='r'?Math.max(+f.p.w||1,+f.p.h||1):2*(+f.p.r||1));t.repeat.set(1/u,1/u)}
+ return t}
+$('#tx').onclick=()=>{const f=F.find(x=>x.id==sel);if(!f)return msg('請先選取要貼圖的特徵');if(f.t=='mesh')return msg('匯入的網格沒有 UV，無法貼圖');$('#ti').click()};
+$('#ti').onchange=e=>{const file=e.target.files[0];e.target.value='';if(!file)return;const f=F.find(x=>x.id==sel);if(!f)return msg('請先選取要貼圖的特徵');
+ const fr=new FileReader();fr.onerror=()=>msg('無法讀取此圖片');
+ fr.onload=()=>{const im=new Image();im.onerror=()=>msg('無法讀取此圖片');
+  im.onload=()=>{const png=/png/.test(file.type),M=png?512:1024,k=Math.min(1,M/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*k));c.height=Math.max(1,Math.round(im.height*k));
+   c.getContext('2d').drawImage(im,0,0,c.width,c.height);f.tex=c.toDataURL(png?'image/png':'image/jpeg',.85);build(f);ui();push();msg('已套用貼圖：'+file.name)};
+  im.src=fr.result};fr.readAsDataURL(file)};
+
+/* 增強功能：量測距離、剖面切割、方向鍵微移、PNG 截圖 */
+let ms=false,mpt=[],cxA=-1,cxV=0,kt;const MSG=new THREE.Group(),clP=new THREE.Plane(new THREE.Vector3(0,-1,0),0);S.add(MSG);
+function mClr(){MSG.children.slice().forEach(o=>{MSG.remove(o);if(o.geometry)o.geometry.dispose()})}
+function mSet(on){ms=!!on;$('#ms').classList.toggle('on',ms);mpt=[];mClr();if(ms){endSk();mvSet(false);rtSet(false);bCancel()}hint()}
+function mPick(h){if(!h)return msg('請點選模型表面');if(mpt.length>=2){mpt=[];mClr()}
+ mpt.push(h.point.clone());const s=new THREE.Mesh(new THREE.SphereGeometry(Math.max(.6,rad*.006),12,8),new THREE.MeshBasicMaterial({color:0xff7a00,depthTest:false}));s.position.copy(h.point);s.renderOrder=999;MSG.add(s);
+ if(mpt.length==2){const[a,b]=mpt,l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),new THREE.LineBasicMaterial({color:0xff7a00,depthTest:false}));l.renderOrder=999;MSG.add(l);
+  clearTimeout(mt);$('#hint').textContent=`距離 ${a.distanceTo(b).toFixed(2)} mm｜ΔX ${(b.x-a.x).toFixed(2)}　ΔY ${(b.y-a.y).toFixed(2)}　ΔZ ${(b.z-a.z).toFixed(2)}`}
+ else msg('已選第一點，請點第二點')}
+$('#ms').onclick=()=>mSet(!ms);
+function clipUI(){return `<h4>剖面切割</h4><label>軸向<select id="cxa">${['關閉','X','Y','Z'].map((t,i)=>`<option value="${i-1}"${i-1==cxA?' selected':''}>${t}</option>`).join('')}</select></label><label>位置<input type="range" id="cxv" min="-150" max="150" step="1" value="${cxV}"${cxA<0?' disabled':''}></label>`}
+function clipSet(){if(cxA<0){R.clippingPlanes=[];return}const n=[0,0,0];n[cxA]=-1;clP.normal.fromArray(n);clP.constant=cxV;R.clippingPlanes=[clP]}
+$('#props').addEventListener('input',e=>{if(e.target.id=='cxv'){cxV=+e.target.value;clipSet()}});
+$('#props').addEventListener('change',e=>{if(e.target.id=='cxa'){cxA=+e.target.value;clipSet();ui()}});
+addEventListener('keydown',e=>{if(/INPUT|SELECT/.test(e.target.tagName)||e.ctrlKey||e.metaKey||e.altKey)return;
+ const k=e.key,f=F.find(x=>x.id==sel),st=e.shiftKey?10:1,A={ArrowLeft:[0,-1],ArrowRight:[0,1],ArrowUp:[2,-1],ArrowDown:[2,1],PageUp:[1,1],PageDown:[1,-1]}[k];
+ if(A){if(!f||sk)return;e.preventDefault();f.pos[A[0]]=+(f.pos[A[0]]+A[1]*st).toFixed(3);f.m.position.fromArray(f.pos);ui();clearTimeout(kt);kt=setTimeout(push,300)}
+ else if(k=='g'||k=='G')mvSet(!mm);else if(k=='r'||k=='R')rtSet(!rtOn);else if(k=='f'||k=='F')fit();else if(k=='m'||k=='M')mSet(!ms)});
+$('#shot').onclick=()=>{R.render(S,C);cv.toBlob(b=>b?save('mini-cad.png',b):msg('截圖失敗'))};
+
+/* 設定面板：右上角座標軸（顯示／透明度／大小）＋建模背景（預設／純色／圖片／影片）。設定存在 localStorage；影片只在本次開啟期間有效 */
+(()=>{
+ const SK='mini-cad-settings',IK=SK+'-img',sp=$('#sp'),bgv=$('#bgv'),vs=$('#vp').style,CW=['#ffffff','#dfe6ee','#8b97a5','#2f3844','#12161c','#1a3a5c'],
+  D0=()=>({g:{on:true,op:100,sz:96},b:{mode:'def',color:'#dfe6ee',fit:'cover',img:''}});
+ let T=D0(),vurl='',vname='',iname='',st,wn=0;
+ const warn=()=>{if(!wn){wn=1;msg('設定無法保存（瀏覽器儲存空間不足或已停用），重新整理後可能還原')}},
+  sv=()=>{clearTimeout(st);st=setTimeout(()=>{try{localStorage.setItem(SK,JSON.stringify({g:T.g,b:{mode:T.b.mode=='video'?'def':T.b.mode,color:T.b.color,fit:T.b.fit}}))}catch(_){warn()}},300)},
+  svImg=()=>{try{T.b.img?localStorage.setItem(IK,T.b.img):localStorage.removeItem(IK)}catch(_){warn()}};
+ /* 座標軸：以 CSS 控制顯示與透明度，大小則重設畫布解析度，避免放大後變糊；按鈕與提示文字一併避開座標軸 */
+ function gA(){const g=T.g,s=g.sz;
+  gc.hidden=!g.on;gc.style.opacity=g.op/100;gc.style.width=gc.style.height=s+'px';
+  gk=s/GS;const px=Math.round(GS*gd*gk);if(gc.width!=px)gc.width=gc.height=px;
+  vs.setProperty('--gb',(g.on?s+16:8)+'px');vs.setProperty('--gr',(g.on?Math.round(s/2-12):8)+'px');vs.setProperty('--gh',(g.on?s+16:56)+'px');
+  gz()}
+ /* 背景：預設漸層／純色／圖片（CSS 背景）／影片（置於 3D 畫布後方的 video） */
+ function bA(){const b=T.b;
+  vs.background='';bgv.hidden=true;bgv.pause();
+  if(b.mode=='color')vs.background=b.color;
+  else if(b.mode=='image'&&b.img){vs.backgroundColor='var(--v2)';vs.backgroundImage=`url("${b.img}")`;vs.backgroundSize=b.fit;vs.backgroundPosition='center';vs.backgroundRepeat='no-repeat'}
+  else if(b.mode=='video'&&vurl){bgv.style.objectFit=b.fit;bgv.hidden=false;const p=bgv.play();if(p&&p.catch)p.catch(()=>{})}}
+ function ui2(){const g=T.g,b=T.b;
+  $('#gon').checked=g.on;$('#gop').value=g.op;$('#gov').textContent=g.op+'%';$('#gsz').value=g.sz;$('#gsv').textContent=g.sz;
+  $('#gop').disabled=$('#gsz').disabled=!g.on;
+  sp.querySelectorAll('[data-bm]').forEach(x=>{const on=x.dataset.bm==b.mode;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});
+  sp.querySelectorAll('[data-bp]').forEach(x=>x.hidden=!x.dataset.bp.split(' ').includes(b.mode));
+  $('#bsw').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.sw==b.color));
+  $('#bcl').value=b.color;$('#bfit').value=b.fit;
+  $('#bin').textContent=b.img?(iname||'已套用圖片'):'尚未選擇圖片';$('#bvn').textContent=vurl?vname:'尚未選擇影片'}
+ function spOpen(on){sp.hidden=!on;$('#stb').classList.toggle('op',on);$('#stb').setAttribute('aria-expanded',on);
+  if(on){if(!$('#lp').hidden)lpOpen(false);ui2()}}
+ function clrVid(){if(vurl)URL.revokeObjectURL(vurl);vurl='';vname='';bgv.removeAttribute('src');bgv.load()}
+ function reset(){clrVid();T=D0();iname='';svImg();bA();gA();ui2();sv();msg('已還原預設設定')}
+ sp.addEventListener('input',e=>{const t=e.target;
+  if(t.id=='gop'){T.g.op=+t.value;gA()}
+  else if(t.id=='gsz'){T.g.sz=+t.value;gA()}
+  else if(t.id=='bcl'){T.b.color=t.value;T.b.mode='color';bA()}
+  else return;
+  ui2();sv()});
+ sp.addEventListener('change',e=>{const t=e.target;
+  if(t.id=='gon'){T.g.on=t.checked;gA()}
+  else if(t.id=='bfit'){T.b.fit=t.value;bA()}
+  else return;
+  ui2();sv()});
+ sp.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.bm){T.b.mode=b.dataset.bm;bA();ui2();sv()}
+  else if(b.dataset.sw){T.b.color=b.dataset.sw;T.b.mode='color';bA();ui2();sv()}
+  else if(b.id=='bpi')$('#bfi').click();
+  else if(b.id=='bpv')$('#bfv').click();
+  else if(b.id=='sr')reset();
+  else if(b.id=='sx')spOpen(false)});
+ $('#bfi').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  const fr=new FileReader();fr.onerror=()=>msg('無法讀取此圖片');
+  fr.onload=()=>{const im=new Image();im.onerror=()=>msg('無法讀取此圖片');
+   im.onload=()=>{const k=Math.min(1,1920/Math.max(im.width,im.height)),c=document.createElement('canvas'),x=c.getContext('2d');
+    c.width=Math.max(1,Math.round(im.width*k));c.height=Math.max(1,Math.round(im.height*k));
+    x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);
+    T.b.img=c.toDataURL('image/jpeg',.85);iname=f.name;T.b.mode='image';svImg();bA();ui2();sv();msg('已套用背景圖片：'+f.name)};
+   im.src=fr.result};fr.readAsDataURL(f)};
+ $('#bfv').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  if(!/^video\//.test(f.type)&&!/\.(mp4|m4v|mov|webm|ogv|ogg|mkv)$/i.test(f.name))return msg('請選擇影片檔');
+  if(vurl)URL.revokeObjectURL(vurl);vurl=URL.createObjectURL(f);vname=f.name;bgv.src=vurl;T.b.mode='video';bA();ui2();sv();msg('已套用背景影片：'+f.name+'（靜音・重複播放）')};
+ bgv.addEventListener('error',()=>{if(!vurl)return;clrVid();if(T.b.mode=='video')T.b.mode='def';bA();ui2();sv();msg('無法播放此影片，已改回預設背景')});
+ $('#stb').onclick=()=>spOpen(sp.hidden);
+ $('#lbtn').addEventListener('click',()=>{if(!$('#lp').hidden)spOpen(false)});
+ $('#hd').addEventListener('click',()=>spOpen(false));
+ addEventListener('keydown',e=>{if(e.key=='Escape'&&!sp.hidden)spOpen(false)});
+ /* 啟動：還原上次的設定（資料不合法時忽略） */
+ try{const o=JSON.parse(localStorage.getItem(SK))||{},g=o.g||{},b=o.b||{},im=localStorage.getItem(IK);
+  if(typeof g.on=='boolean')T.g.on=g.on;
+  if(g.op!=null&&Number.isFinite(+g.op))T.g.op=cl(Math.round(+g.op),10,100);
+  if(g.sz!=null&&Number.isFinite(+g.sz))T.g.sz=cl(Math.round(+g.sz),60,160);
+  if(typeof b.color=='string'&&/^#[0-9a-f]{6}$/i.test(b.color))T.b.color=b.color;
+  if(b.fit=='contain')T.b.fit='contain';
+  if(typeof im=='string'&&/^data:image\/(jpeg|png|webp|gif);base64,[A-Za-z0-9+\/=]+$/.test(im))T.b.img=im;
+  if(b.mode=='color'||(b.mode=='image'&&T.b.img))T.b.mode=b.mode}catch(_){}
+ $('#bsw').innerHTML=CW.map(c=>`<button data-sw="${c}" style="background:${c}" aria-label="背景色 ${c}"></button>`).join('');
+ bA();gA();ui2()})();
+
+/* 新增功能：鏡像複製、線性陣列、移動吸附間距、自動旋轉展示 */
+let tt=false,msS=.1;
+function mirror(){const f=F.find(x=>x.id==sel);if(!f)return msg('請先選取要鏡像的特徵');
+ const a=+$('#mpl').value,g=f.m.geometry,p=g.attributes.position,ix=g.index,n=ix?ix.count:p.count,v=new THREE.Vector3(),w=[],T=[];
+ f.m.updateMatrixWorld(true);
+ for(let i=0;i<n;i++){v.fromBufferAttribute(p,ix?ix.getX(i):i).applyMatrix4(f.m.matrixWorld);w.push(v.x,v.y,v.z)}
+ for(let i=0;i<n;i+=3){const t=w.slice(i*3,i*3+9).map((x,j)=>j%3==a?-x:x);T.push(...t.slice(0,3),...t.slice(6,9),...t.slice(3,6))}
+ add('mesh',{v:T,s:1,b:1},{name:f.name+' 鏡像',c:f.c,mat:f.mat,rho:f.rho,o:f.o});
+ msg('已鏡像複製（鏡像面通過世界原點；結果為網格特徵，可復原）')}
+function arr(){const f=F.find(x=>x.id==sel);if(!f)return msg('請先選取要陣列的特徵');
+ const a=+$('#aax').value,n=cl(Math.round(+$('#acn').value)||0,2,20),s=+$('#asp').value;if(!s)return msg('間距不可為 0');
+ for(let i=1;i<n;i++){const o=f.pos.slice();o[a]=+(o[a]+s*i).toFixed(3);
+  const g={id:nid++,t:f.t,p:{...f.p},pos:o,rot:f.rot.slice(),c:f.c,vis:f.vis,name:f.name+' 陣列'+i,o:f.o,tex:f.tex,mat:f.mat,rho:f.rho};F.push(g);build(g)}
+ select(f.id);push();msg(`已沿 ${'XYZ'[a]} 軸陣列 ${n} 個（間距 ${s} mm，可一次復原）`)}
+$('#mn').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
+ if(t.id=='mir')mirror();else if(t.id=='arr')arr();
+ else if(t.id=='tt'){tt=!tt;t.classList.toggle('on',tt);msg(tt?'自動旋轉展示：開啟（拖曳畫面可暫停）':'自動旋轉展示：關閉')}});
+$('#msn').onchange=e=>{msS=+e.target.value||.1;msg('移動模式吸附間距：'+msS+' mm')};
+
+/* 自動存檔：變更後 0.4 秒寫入 localStorage，重開頁面自動還原 */
+const AK='mini-cad-autosave';let at;
+function asv(now){clearTimeout(at);const w=()=>{try{localStorage.setItem(AK,JSON.stringify({v:1,t:Date.now(),F:F.map(({m,v,...r})=>r),L:LD}));$('#as').textContent='已存檔 '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}catch(_){$('#as').textContent='自動存檔失敗'}};now===true?w():at=setTimeout(w,400)}
+addEventListener('visibilitychange',()=>{if(document.hidden)asv(true)});addEventListener('pagehide',()=>asv(true));
+loop();cam();hint();
+let rs=null;try{rs=JSON.parse(localStorage.getItem(AK))}catch(_){}
+if(rs&&Array.isArray(rs.F)){load(rs);msg('已還原自動存檔')}else add('box',{...DEF.box});
+</script>
+</body>
+</html>

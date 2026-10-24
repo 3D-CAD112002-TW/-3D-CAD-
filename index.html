@@ -84,7 +84,7 @@ input[type=color]{width:90px;height:30px;padding:0;border:1px solid var(--bd);bo
 #bar #mn button.tg.on::after{content:none}
 #bar #mn h4{margin:0 0 0 4px;flex:none;white-space:nowrap}
 #bar #mn label{margin:0;padding:0 2px;white-space:nowrap}
-#acn,#asp{width:64px}
+#acn,#asp,#pa,#pof,#sd{width:64px}
 /* 設定面板與背景影片 */
 #bgv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 #bgv[hidden]{display:none}
@@ -140,8 +140,8 @@ input[type=color]{width:90px;height:30px;padding:0;border:1px solid var(--bd);bo
 <input id="bfi" type="file" accept="image/*" hidden><input id="bfv" type="file" accept="video/*" hidden>
 <div id="mn" hidden>
 <div data-g="add"><h4>基本體</h4><button data-a="box">▣ 方塊</button><button data-a="cyl">⬭ 圓柱</button><button data-a="sph">● 球體</button><button data-a="cone">▲ 圓錐</button><h4>進階體</h4><button data-a="tor">◎ 圓環（Torus）</button><button data-a="pyr">△ 角錐</button><button data-a="pip">◯ 管狀體（Pipe）</button><h4>正多面體</h4><label>種類<select id="py"><option value="4">正四面體</option><option value="6">正六面體</option><option value="8">正八面體</option><option value="12">正十二面體</option><option value="20">正二十面體</option></select></label><button data-a="ply">⬡ 新增正多面體</button><h4>貼圖</h4><button id="tx">🖼 匯入貼圖（套用到所選特徵）</button></div>
-<div data-g="ed" hidden><button id="ud" class="tg">↶ 復原</button><button id="rd" class="tg">↷ 重做</button><button id="mvm">✥ 移動模式（拖曳 XYZ 箭頭）</button><button id="rtm">⟳ 旋轉模式（拖曳 XYZ 圓環）</button><button id="dp">⧉ 複製所選特徵 (Ctrl+D)</button><button id="rn">✎ 重新命名所選特徵 (F2)</button><button id="bu2">⊕ 聯集（先選主體，再點選另一特徵）</button><button id="bs2">⊖ 切除（先選主體，再點選刀具）</button><button id="bi2">∩ 交集（先選主體，再點選另一特徵）</button><button id="mir">⇋ 鏡像複製</button><label>鏡像面<select id="mpl"><option value="0">YZ 面（X 反向）</option><option value="1">XZ 面（Y 反向）</option><option value="2">XY 面（Z 反向）</option></select></label><button id="arr">▦ 線性陣列</button><label>軸向<select id="aax"><option value="0">X</option><option value="1">Y</option><option value="2">Z</option></select></label><label>數量<input type="number" id="acn" value="3" min="2" max="20" step="1"></label><label>間距<input type="number" id="asp" value="50" step="1"></label><label>移動吸附<select id="msn"><option value="0.1">0.1 mm</option><option value="1">1 mm</option><option value="5">5 mm</option><option value="10">10 mm</option></select></label></div>
-<div data-g="sk" hidden><button id="sk">開始草圖</button><label>基準面<select id="pl"><option value="front">前視基準面</option><option value="top">上視基準面</option><option value="right">右視基準面</option></select></label><label>草圖工具<select id="tl"><option value="r">矩形</option><option value="c">圓形</option></select></label></div>
+<div data-g="ed" hidden><button id="ud" class="tg">↶ 復原</button><button id="rd" class="tg">↷ 重做</button><button id="mvm">✥ 移動模式（拖曳 XYZ 箭頭）</button><button id="rtm">⟳ 旋轉模式（拖曳 XYZ 圓環）</button><button id="dp">⧉ 複製所選特徵 (Ctrl+D)</button><button id="rn">✎ 重新命名所選特徵 (F2)</button><button id="bu2">⊕ 聯集（先選主體，再點選另一特徵）</button><button id="bs2">⊖ 切除（先選主體，再點選刀具）</button><button id="bi2">∩ 交集（先選主體，再點選另一特徵）</button><button id="mir">⇋ 鏡像複製</button><label>鏡像面<select id="mpl"><option value="0">YZ 面（X 反向）</option><option value="1">XZ 面（Y 反向）</option><option value="2">XY 面（Z 反向）</option></select></label><button id="arr">▦ 線性陣列</button><label>軸向<select id="aax"><option value="0">X</option><option value="1">Y</option><option value="2">Z</option></select></label><label>數量<input type="number" id="acn" value="3" min="2" max="20" step="1"></label><label>間距<input type="number" id="asp" value="50" step="1"></label><button id="par">◌ 環形陣列（用上方軸向與數量）</button><label>總角度<input type="number" id="pa" value="360" step="15"></label><label>移動吸附<select id="msn"><option value="0.1">0.1 mm</option><option value="1">1 mm</option><option value="5">5 mm</option><option value="10">10 mm</option></select></label></div>
+<div data-g="sk" hidden><button id="sk">開始草圖</button><label>基準面<select id="pl"><option value="front">前視基準面</option><option value="top">上視基準面</option><option value="right">右視基準面</option></select></label><label>草圖工具<select id="tl"><option value="r">矩形</option><option value="c">圓形</option><option value="p">多邊形（點選頂點）</option><option value="v">旋轉剖面（繞 Y 軸）</option></select></label><label>基準面偏移<input type="number" id="pof" value="0" step="5"></label><label>伸長深度<input type="number" id="sd" value="20" min="1" step="5"></label><label>方向<select id="sdr"><option value="pos">正向</option><option value="neg">反向</option><option value="mid">雙向對稱</option></select></label><label>完成後<select id="sm"><option value="add">新增特徵</option><option value="cut">從所選主體切除</option></select></label><button id="pu">↶ 退一點</button><button id="pf">✔ 完成多邊形</button></div>
 <div data-g="vw" hidden><button data-v="front">前視圖</button><button data-v="top">上視圖</button><button data-v="right">右視圖</button><button data-v="iso">等角視圖</button><button data-v="fit">縮放至全部</button><button id="tt" class="tg">⟲ 自動旋轉展示</button></div>
 <div data-g="ds" hidden><button id="wf" class="tg">線框顯示</button><button id="gd" class="tg on">顯示格線</button><button id="sa">👁 全部顯示特徵</button><button id="ha">🚫 全部隱藏特徵</button><button id="ms">📏 量測距離（M）</button><button id="hd">隱藏介面</button></div>
 <div data-g="pj" hidden><button id="im">匯入專案／模型</button><button id="ep">存專案（.json）</button><button id="nw">🗋 新專案（可復原）</button><button id="e3">匯出 STL/OBJ（.zip）</button><button id="shot">📷 截圖（PNG）</button></div>
@@ -174,10 +174,10 @@ new ResizeObserver(()=>{const w=vp.clientWidth,h=vp.clientHeight;if(!w||!h)retur
 function loop(){if(tt&&!P.size&&!sk){th-=.006;cam()}mvUpdate();rtUpdate();R.render(S,C);requestAnimationFrame(loop)}/* 於腳本末端啟動 */
 
 /* 特徵資料 */
-const NM={box:'方塊',cyl:'圓柱',sph:'球體',cone:'圓錐',ext:'伸長凸台',tor:'圓環',pyr:'角錐',pip:'管狀體',ply:'正多面體',mesh:'匯入網格'},PLN={4:'正四面體',6:'正六面體',8:'正八面體',12:'正十二面體',20:'正二十面體'},IC={box:'▣',cyl:'⬭',sph:'●',cone:'▲',tor:'◎',pyr:'△',pip:'◯',ply:'⬡',ext:'⬒',mesh:'◇'},esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const NM={box:'方塊',cyl:'圓柱',sph:'球體',cone:'圓錐',ext:'伸長凸台',tor:'圓環',pyr:'角錐',pip:'管狀體',ply:'正多面體',mesh:'匯入網格',rev:'旋轉體'},PLN={4:'正四面體',6:'正六面體',8:'正八面體',12:'正十二面體',20:'正二十面體'},IC={box:'▣',cyl:'⬭',sph:'●',cone:'▲',tor:'◎',pyr:'△',pip:'◯',ply:'⬡',ext:'⬒',mesh:'◇',rev:'◍'},esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 const PAL=[0x8fa8c4,0xc49a6c,0x7fb69e,0xb58fc4,0xd4a5a5,0xa8b86f];
 const DEF={box:{w:40,h:30,d:30},cyl:{r:15,h:40},sph:{r:20},cone:{r:20,h:40},tor:{R:25,r:8},pyr:{r:25,h:40,n:4},pip:{r:20,t:4,h:40},ply:{r:25,k:12}};
-const DM={box:[['w','寬'],['h','高'],['d','深']],cyl:[['r','半徑'],['h','高']],cone:[['r','底半徑'],['h','高']],sph:[['r','半徑']],tor:[['R','環半徑'],['r','管半徑']],pyr:[['r','底外接圓半徑'],['h','高'],['n','邊數（3–32）']],pip:[['r','外半徑'],['t','壁厚'],['h','高']],ply:[['r','外接球半徑'],['k','面數（4/6/8/12/20）']],mesh:[['s','縮放']]};
+const DM={box:[['w','寬'],['h','高'],['d','深']],cyl:[['r','半徑'],['h','高']],cone:[['r','底半徑'],['h','高']],sph:[['r','半徑']],tor:[['R','環半徑'],['r','管半徑']],pyr:[['r','底外接圓半徑'],['h','高'],['n','邊數（3–32）']],pip:[['r','外半徑'],['t','壁厚'],['h','高']],ply:[['r','外接球半徑'],['k','面數（4/6/8/12/20）']],mesh:[['s','縮放']],rev:[]};
 const PL={front:[0,0,'前視基準面'],top:[-Math.PI/2,0,'上視基準面'],right:[0,Math.PI/2,'右視基準面']};
 /* 材質庫：密度(g/cm³)、外觀(顏色／金屬度／粗糙度／環境反射強度)、程序紋理(x)與紋理尺寸(s, mm) */
 const DR=7.85,MGR=[
@@ -331,11 +331,14 @@ function geo(f){
   g=k==4?new THREE.TetrahedronGeometry(r):k==6?new THREE.BoxGeometry(2*r/Math.sqrt(3),2*r/Math.sqrt(3),2*r/Math.sqrt(3)):k==8?new THREE.OctahedronGeometry(r):k==12?new THREE.DodecahedronGeometry(r):new THREE.IcosahedronGeometry(r);
   g.translate(0,r,0)}
  else if(f.t=='mesh'){const s=Math.max(1e-4,+p.s||1),n=p.v.length-p.v.length%9,a=new Float32Array(n);for(let i=0;i<n;i++)a[i]=p.v[i]*s;g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(a,3));if(p.b)g.setAttribute('normal',new THREE.BufferAttribute(cNorm(p.v,n),3));else g.computeVertexNormals()}
+ else if(f.t=='rev'){const V=p.pts.map(a=>new THREE.Vector2(Math.max(0,a[0]),a[1]));let ar=0;V.forEach((a,i)=>{const b=V[(i+1)%V.length];ar+=a.x*b.y-b.x*a.y});if(ar<0)V.reverse();V.push(V[0].clone());
+  g=new THREE.LatheGeometry(V,64).toNonIndexed();const a=g.attributes.position.array;g.setAttribute('normal',new THREE.BufferAttribute(cNorm(a,a.length),3))}
  else{
   const s=new THREE.Shape();
   if(p.k=='r'){s.moveTo(0,0);s.lineTo(q('w'),0);s.lineTo(q('w'),q('h'));s.lineTo(0,q('h'));s.closePath()}
+  else if(p.k=='p'){p.pts.forEach((a,i)=>i?s.lineTo(a[0],a[1]):s.moveTo(a[0],a[1]));s.closePath()}
   else s.absarc(0,0,q('r'),0,Math.PI*2,false);
-  const d=Math.max(.5,+p.d||.5),m=p.k=='r'?Math.min(q('w'),q('h')):q('r')*2,b=Math.max(0,Math.min(+p.fl||0,d/2-.1,m/2-.1));
+  const d=Math.max(.5,+p.d||.5),m=p.k=='c'?q('r')*2:Math.min(q('w'),q('h')),b=Math.max(0,Math.min(+p.fl||0,d/2-.1,m/2-.1));
   g=new THREE.ExtrudeGeometry(s,{depth:d-2*b,bevelEnabled:b>0,bevelThickness:b,bevelSize:b,bevelOffset:-b,bevelSegments:4,curveSegments:48});
   if(b>0)g.translate(0,0,b);
  }
@@ -359,7 +362,7 @@ function ui(){
  $('#tree').innerHTML='<h4>特徵樹（點基準面開始草圖）</h4>'+['front','top','right'].map(k=>`<div class="it pl" data-pl="${k}">▱ ${PL[k][2]}</div>`).join('')+F.map(f=>`<div class="it${f.id==sel?' on':''}" data-id="${f.id}"><span>${IC[f.t]} ${esc(f.name)}</span><b data-v="${f.id}">${f.vis?'👁':'🚫'}</b></div>`).join('');
  const f=F.find(x=>x.id==sel);let h='<h4>屬性</h4>';
  if(f){
-  const D=f.t=='ext'?[...(f.p.k=='r'?[['w','寬'],['h','高']]:[['r','半徑']]),['d','伸長深度'],['fl','圓角']]:DM[f.t];
+  const D=f.t=='ext'?[...(f.p.k=='r'?[['w','寬'],['h','高']]:f.p.k=='p'?[]:[['r','半徑']]),['d','伸長深度'],['fl','圓角']]:DM[f.t];
   const row=(l,k,v)=>`<label>${l}<input type="number" step="1" data-k="${k}" value="${+(+v).toFixed(2)}"></label>`;
   h+=`<div class="bo"><button id="bu" title="聯集：按下後再點選要合併的特徵">⊕ 聯集</button><button id="bs" title="切除：按下後再點選要切除的刀具特徵">⊖ 切除</button><button id="bi" title="交集：按下後再點選要取交集的特徵，只保留兩者重疊的部分">∩ 交集</button></div><label>名稱<input type="text" data-k="name" maxlength="40" value="${esc(f.name)}"></label>`+D.map(([k,l])=>row(l,'p.'+k,f.p[k]||0)).join('')+'<h4>位置（基準點）</h4>'+['X','Y','Z'].map((l,i)=>row(l,'pos.'+i,f.pos[i])).join('')+matUI(f)+`<label>顏色<input type="color" data-k="c" value="#${f.c.toString(16).padStart(6,'0')}"></label><label>透明度<input type="range" min="0.1" max="1" step="0.05" data-k="o" value="${f.o||1}"></label><button id="gnd" style="width:100%;margin-top:6px">⤓ 貼齊地面（Y=0）</button>${f.tex?'<button id="rtx" style="width:100%;margin-top:6px">✕ 移除貼圖</button>':''}${f.t=='mesh'&&!f.p.b?'<button id="zup">Z 軸朝上轉正</button>':''}<button id="del">刪除特徵</button>`;
  }else h+='<div class="mu">點選模型或特徵樹項目以編輯尺寸</div>';
@@ -393,7 +396,7 @@ $('#mn').onclick=e=>{const t=e.target.closest('button');if(!t)return;
  if(t.id=='sk')sk?endSk():startSk($('#pl').value);
  if(t.id=='wf'){wf=!wf;t.classList.toggle('on',wf);F.forEach(f=>f.m.material.wireframe=wf)}
  if(t.id=='gd'){const on=t.classList.toggle('on');G0.visible=on&&!sk}};
-$('#pl').onchange=()=>{if(sk)startSk($('#pl').value)};$('#tl').onchange=()=>hint();
+$('#pl').onchange=()=>{if(sk)startSk($('#pl').value)};$('#tl').onchange=()=>{pp=[];pDraw();hint()};$('#pof').onchange=()=>{if(sk)startSk($('#pl').value)};
 addEventListener('keydown',e=>{if(/INPUT|SELECT/.test(e.target.tagName))return;if(e.key=='Escape'){endSk();bCancel();mvSet(false);rtSet(false);mSet(false)}if((e.key=='Delete'||e.key=='Backspace')&&$('#del'))$('#del').click()});
 
 /* 特徵改名：雙擊特徵樹項目、F2、選單或屬性欄「名稱」 */
@@ -404,9 +407,9 @@ function ren(id){const f=F.find(x=>x.id==id),s=$(`#tree [data-id="${id}"] span`)
 $('#tree').ondblclick=e=>{const i=e.target.closest('[data-id]');if(i&&!e.target.dataset.v)ren(+i.dataset.id)};
 addEventListener('keydown',e=>{if(e.key=='F2'&&sel&&!/INPUT|SELECT/.test(e.target.tagName)){e.preventDefault();ren(sel)}});
 /* 草圖 → 伸長 */
-function hint(){$('#hint').textContent=bo?bHint():ms?'量測模式：依序點選模型表面兩點，再點一次重新量測・Esc 結束':sk?`${PL[$('#pl').value][2]}草圖：拖曳繪製${$('#tl').value=='r'?'矩形':'圓形'}，放開後自動伸長凸台`:rtOn?'旋轉模式：點選模型，拖曳 X／Y／Z 圓環旋轉・拖曳其他處旋轉視角':mm?'移動模式：點選模型，拖曳 X／Y／Z 箭頭移動・拖曳其他處旋轉視角':'拖曳旋轉・雙指縮放／平移・點選物件編輯・G 移動 R 旋轉 M 量測 F 全部 方向鍵微移'}
-function startSk(k){mvSet(false);rtSet(false);bo=null;sk=true;$('#pl').value=k;SP.rotation.set(PL[k][0],PL[k][1],0);SP.updateMatrixWorld(true);SP.visible=true;G0.visible=false;tg.set(0,0,0);view(k);$('#sk').textContent='結束草圖';$('#sk').classList.add('on');$('[data-m=sk]').classList.add('on');hint()}
-function endSk(){sk=false;cancelDraw();SP.visible=false;G0.visible=$('#gd').classList.contains('on');$('#sk').textContent='開始草圖';$('#sk').classList.remove('on');$('[data-m=sk]').classList.remove('on');hint()}
+function hint(){$('#hint').textContent=bo?bHint():ms?'量測模式：依序點選模型表面兩點，再點一次重新量測・Esc 結束':sk?(pm()?`${PL[$('#pl').value][2]}草圖：逐點點選頂點（5 mm 格點）${$('#tl').value=='v'?'，剖面畫在 Y 軸右側':''}，點回第一點或按「完成多邊形」封閉`:`${PL[$('#pl').value][2]}草圖：拖曳繪製${$('#tl').value=='r'?'矩形':'圓形'}，放開後自動伸長凸台`):rtOn?'旋轉模式：點選模型，拖曳 X／Y／Z 圓環旋轉・拖曳其他處旋轉視角':mm?'移動模式：點選模型，拖曳 X／Y／Z 箭頭移動・拖曳其他處旋轉視角':'拖曳旋轉・雙指縮放／平移・點選物件編輯・G 移動 R 旋轉 M 量測 F 全部 方向鍵微移'}
+function startSk(k){mvSet(false);rtSet(false);bo=null;sk=true;$('#pl').value=k;pp=[];pDraw();SP.rotation.set(PL[k][0],PL[k][1],0);SP.position.copy(new THREE.Vector3(0,0,1).applyEuler(SP.rotation).multiplyScalar(+$('#pof').value||0));SP.updateMatrixWorld(true);SP.visible=true;G0.visible=false;tg.copy(SP.position);view(k);$('#sk').textContent='結束草圖';$('#sk').classList.add('on');$('[data-m=sk]').classList.add('on');hint()}
+function endSk(){sk=false;cancelDraw();pp=[];pDraw();SP.visible=false;G0.visible=$('#gd').classList.contains('on');$('#sk').textContent='開始草圖';$('#sk').classList.remove('on');$('[data-m=sk]').classList.remove('on');hint()}
 const sn=v=>Math.round(v/5)*5,RC=new THREE.Raycaster(),M=new THREE.Vector2();
 function ray(e){const r=vp.getBoundingClientRect();M.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);RC.setFromCamera(M,C)}
 function onPl(e){ray(e);const h=RC.intersectObject(HP)[0];if(!h)return null;const q=SP.worldToLocal(h.point.clone());return[sn(q.x),sn(q.y)]}
@@ -417,16 +420,36 @@ function preview(){const{a,b}=drag,pts=[];
  if(!pv){pv=new THREE.LineLoop(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0xff7a00}));pv.frustumCulled=false;SP.add(pv)}
  pv.geometry.setAttribute('position',new THREE.Float32BufferAttribute(pts,3))}
 function commit(){const{a,b}=drag;cancelDraw();let p,o;
- if($('#tl').value=='r'){const w=Math.abs(b[0]-a[0]),h=Math.abs(b[1]-a[1]);if(w<5||h<5)return;p={k:'r',w,h,d:20,fl:0};o=[Math.min(a[0],b[0]),Math.min(a[1],b[1])]}
- else{const r=Math.hypot(b[0]-a[0],b[1]-a[1]);if(r<5)return;p={k:'c',r,d:20,fl:0};o=a}
- const wp=SP.localToWorld(new THREE.Vector3(o[0],o[1],0)).toArray(),rot=[SP.rotation.x,SP.rotation.y];
- endSk();add('ext',p,{pos:wp,rot});view('iso')}
+ if($('#tl').value=='r'){const w=Math.abs(b[0]-a[0]),h=Math.abs(b[1]-a[1]);if(w<5||h<5)return;p={k:'r',w,h,d:SD(),fl:0};o=[Math.min(a[0],b[0]),Math.min(a[1],b[1])]}
+ else{const r=Math.hypot(b[0]-a[0],b[1]-a[1]);if(r<5)return;p={k:'c',r,d:SD(),fl:0};o=a}
+fin('ext',p,o)}
+/* 進階草圖：多邊形／旋轉剖面、基準面偏移、方向、切除模式；環形陣列 */
+const SD=()=>Math.max(.5,+$('#sd').value||20),pm=()=>sk&&'pv'.includes($('#tl').value);let pp=[],pl=null;
+function pDraw(){if(pl){SP.remove(pl);pl.geometry.dispose();pl=null}if(!pp.length)return;const v=[];pp.forEach(q=>v.push(q[0],q[1],0));
+ pl=new THREE.Line(new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(v,3)),new THREE.LineBasicMaterial({color:0xff7a00}));pl.frustumCulled=false;SP.add(pl)}
+function pAdd(e){let a=onPl(e);if(!a)return;if($('#tl').value=='v')a=[Math.max(0,a[0]),a[1]];const f=pp[0],l=pp[pp.length-1];
+ if(f&&pp.length>=3&&a[0]==f[0]&&a[1]==f[1])return pFinish();if(l&&a[0]==l[0]&&a[1]==l[1])return;
+ pp.push(a);pDraw();msg(`已加入第 ${pp.length} 點（${a[0]}, ${a[1]}）${pp.length>=3?'・點回第一點即封閉':''}`)}
+function pFinish(){if(pp.length<3)return msg('至少需要 3 個頂點');const q=pp;pp=[];pDraw();
+ if($('#tl').value=='v')return fin('rev',{pts:q},[0,0]);
+ const X=q.map(a=>a[0]),Y=q.map(a=>a[1]),o=q[0];
+ fin('ext',{k:'p',pts:q.map(a=>[a[0]-o[0],a[1]-o[1]]),w:Math.max(...X)-Math.min(...X),h:Math.max(...Y)-Math.min(...Y),d:SD(),fl:0},o)}
+function fin(t,p,o){const body=sel,n=new THREE.Vector3(0,0,1).applyEuler(SP.rotation),dr=$('#sdr').value,d=+p.d||0,
+ wp=SP.localToWorld(new THREE.Vector3(o[0],o[1],0)).addScaledVector(n,dr=='neg'?-d:dr=='mid'?-d/2:0).toArray().map(x=>+x.toFixed(3)),rot=[SP.rotation.x,SP.rotation.y];
+ endSk();add(t,p,{pos:wp,rot});view('iso');
+ if($('#sm').value=='cut'){const b=F.find(x=>x.id==body);if(b){bo={op:'s',a:b.id};bApply(nid-1)}else msg('切除模式需先選取要切除的主體特徵')}}
+function polar(){const f=F.find(x=>x.id==sel);if(!f)return msg('請先選取要陣列的特徵');
+ const a=+$('#aax').value,n=cl(Math.round(+$('#acn').value)||0,2,60),T=+$('#pa').value||360,st=(T>=360?T/n:T/(n-1))*Math.PI/180,q0=new THREE.Quaternion().setFromEuler(new THREE.Euler(f.rot[0],f.rot[1],f.rot[2]||0));
+ for(let i=1;i<n;i++){const dq=new THREE.Quaternion().setFromAxisAngle(MX[a],st*i),eu=new THREE.Euler().setFromQuaternion(dq.clone().multiply(q0));
+  const g={id:nid++,t:f.t,p:{...f.p},pos:new THREE.Vector3().fromArray(f.pos).applyQuaternion(dq).toArray().map(x=>+x.toFixed(3)),rot:[eu.x,eu.y,eu.z],c:f.c,vis:f.vis,name:f.name+' 環列'+i,o:f.o,tex:f.tex,mat:f.mat,rho:f.rho};F.push(g);build(g)}
+ select(f.id);push();msg(`已繞世界 ${'XYZ'[a]} 軸環形陣列 ${n} 個（總角度 ${T}°，可一次復原）`)}
+addEventListener('keydown',e=>{if(e.key=='Enter'&&pm()&&!/INPUT|SELECT/.test(e.target.tagName))pFinish()});
 
 /* 指標操作：旋轉／平移／縮放／選取／繪圖 */
 const P=new Map();let mv=0,pd=0;const d2=()=>{const[a,b]=[...P.values()];return Math.hypot(a[0]-b[0],a[1]-b[1])||1};
 function pick(e){ray(e);const h=RC.intersectObjects(F.filter(f=>f.vis).map(f=>f.m),false)[0];const k=h?h.object.userData.id:null;if(ms)return mPick(h);bo?bApply(k):select(k)}
 cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);P.set(e.pointerId,[e.clientX,e.clientY]);mv=0;
- if(P.size==2){cancelDraw();mvEnd();rtEnd();pd=d2()}else if(mvStart(e)){}else if(rtStart(e)){}else if(sk&&e.button==0){const a=onPl(e);if(a)drag={a,b:a,id:e.pointerId}}});
+ if(P.size==2){cancelDraw();mvEnd();rtEnd();pd=d2()}else if(mvStart(e)){}else if(rtStart(e)){}else if(sk&&!pm()&&e.button==0){const a=onPl(e);if(a)drag={a,b:a,id:e.pointerId}}});
 cv.addEventListener('pointermove',e=>{const o=P.get(e.pointerId);if(!o)return;const dx=e.clientX-o[0],dy=e.clientY-o[1];P.set(e.pointerId,[e.clientX,e.clientY]);mv+=Math.abs(dx)+Math.abs(dy);
  if(P.size==2){const d=d2();rad=cl(rad*pd/d,5,2500);pd=d;pan(dx/2,dy/2)}
  else if(md&&md.id==e.pointerId)mvDrag(e);
@@ -439,7 +462,7 @@ cv.addEventListener('pointerup',e=>{if(!P.delete(e.pointerId))return;pd=0;
  if(md&&md.id==e.pointerId)mvEnd();
  else if(rtD&&rtD.id==e.pointerId)rtEnd();
  else if(drag&&drag.id==e.pointerId){if(drag.a[0]!=drag.b[0]||drag.a[1]!=drag.b[1])commit();else cancelDraw()}
- else if(!sk&&mv<6&&!P.size)pick(e)});
+ else if(pm()&&mv<6&&!P.size)pAdd(e);else if(!sk&&mv<6&&!P.size)pick(e)});
 cv.addEventListener('pointercancel',e=>{P.delete(e.pointerId);cancelDraw();if(md&&md.id==e.pointerId)mvEnd();if(rtD&&rtD.id==e.pointerId)rtEnd()});
 cv.addEventListener('wheel',e=>{e.preventDefault();rad=cl(rad*(e.deltaY>0?1.1:.9),5,2500);cam()},{passive:false});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
@@ -448,7 +471,9 @@ cv.addEventListener('contextmenu',e=>e.preventDefault());
 let DLs=null,mt;
 function msg(t){clearTimeout(mt);$('#hint').textContent=t;mt=setTimeout(hint,3500)}
 ;(window.claude?claude.use('downloads'):Promise.resolve(null)).catch(()=>null).then(d=>{DLs=d;if(d)document.querySelectorAll('.ex').forEach(b=>b.hidden=false)});
-async function save(name,data){if(!DLs)return msg('此環境無法下載檔案');try{await DLs.save({filename:name,data});msg('已儲存 '+name)}catch(e){if(!e||e.code!='declined')msg('無法儲存：'+((e&&(e.message||e.code))||'未知錯誤'))}}
+/* 一般網頁（如 GitHub Pages）沒有 Claude 的下載功能時，改用瀏覽器內建下載 */
+function dl(name,data){try{const b=data instanceof Blob?data:new Blob([data],{type:'application/octet-stream'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);msg('已下載 '+name)}catch(_){msg('無法下載檔案')}}
+async function save(name,data){if(!DLs)return dl(name,data);try{await DLs.save({filename:name,data});msg('已儲存 '+name)}catch(e){if(!e||e.code!='declined')msg('無法儲存：'+((e&&(e.message||e.code))||'未知錯誤'))}}
 function fit(){const L=F.filter(f=>f.vis);if(!L.length)return;const bb=new THREE.Box3();L.forEach(f=>bb.expandByObject(f.m));const s=bb.getSize(new THREE.Vector3()).length();bb.getCenter(tg);rad=cl(s*1.6||180,20,2500);cam()}
 function tris(){const o=[],v=new THREE.Vector3();
  F.filter(f=>f.vis).forEach(f=>{f.m.updateMatrixWorld(true);const g=f.m.geometry,p=g.attributes.position,ix=g.index,n=ix?ix.count:p.count;
@@ -470,7 +495,7 @@ function pObj(t){const V=[],r=[];for(const l of t.split('\n')){const s=l.trim().
   for(let k=1;k<ix.length-1;k++)[ix[0],ix[k],ix[k+1]].forEach(i=>V[i]&&r.push(...V[i]))}}
  return r}
 function load(o){if(!o||!Array.isArray(o.F))throw 0;bo=null;endSk();if(o.L)setL(o.L);F.forEach(f=>grp.remove(f.m));F=[];nid=1;
- o.F.forEach(r=>{if(!NM[r.t]||!r.p||(r.t=='mesh'&&!Array.isArray(r.p.v)))return;
+ o.F.forEach(r=>{if(!NM[r.t]||!r.p||(r.t=='mesh'&&!Array.isArray(r.p.v))||((r.t=='rev'||r.p.k=='p')&&!Array.isArray(r.p.pts)))return;
   const f={...r,id:nid++,name:String(r.name||NM[r.t]),vis:r.vis!==false,c:+r.c||0x8fa8c4,pos:Array.isArray(r.pos)?r.pos.slice(0,3).map(Number):[0,0,0],rot:Array.isArray(r.rot)?r.rot.slice(0,3).map(Number):[0,0]};if(!MAT[f.mat])delete f.mat;if(+f.rho>0)f.rho=+f.rho;else delete f.rho;F.push(f);build(f)});
  select(null);fit();push()}
 $('#ep').onclick=()=>save('mini-cad-project.json',JSON.stringify({v:1,F:F.map(({m,v,...r})=>r),L:LD}));
@@ -751,7 +776,7 @@ const TI=new Map();
 function gTex(f){let im=TI.get(f.tex);if(!im){im=new Image();im.src=f.tex;TI.set(f.tex,im)}
  const t=new THREE.Texture(),ok=()=>{t.image=im;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;t.needsUpdate=true};
  im.complete&&im.naturalWidth?ok():im.addEventListener('load',ok,{once:true});
- if(f.t=='ext'){const u=Math.max(1,f.p.k=='r'?Math.max(+f.p.w||1,+f.p.h||1):2*(+f.p.r||1));t.repeat.set(1/u,1/u)}
+ if(f.t=='ext'){const u=Math.max(1,f.p.k=='c'?2*(+f.p.r||1):Math.max(+f.p.w||1,+f.p.h||1));t.repeat.set(1/u,1/u)}
  return t}
 $('#tx').onclick=()=>{const f=F.find(x=>x.id==sel);if(!f)return msg('請先選取要貼圖的特徵');if(f.t=='mesh')return msg('匯入的網格沒有 UV，無法貼圖');$('#ti').click()};
 $('#ti').onchange=e=>{const file=e.target.files[0];e.target.value='';if(!file)return;const f=F.find(x=>x.id==sel);if(!f)return msg('請先選取要貼圖的特徵');
@@ -874,7 +899,7 @@ function arr(){const f=F.find(x=>x.id==sel);if(!f)return msg('請先選取要陣
   const g={id:nid++,t:f.t,p:{...f.p},pos:o,rot:f.rot.slice(),c:f.c,vis:f.vis,name:f.name+' 陣列'+i,o:f.o,tex:f.tex,mat:f.mat,rho:f.rho};F.push(g);build(g)}
  select(f.id);push();msg(`已沿 ${'XYZ'[a]} 軸陣列 ${n} 個（間距 ${s} mm，可一次復原）`)}
 $('#mn').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
- if(t.id=='mir')mirror();else if(t.id=='arr')arr();
+ if(t.id=='mir')mirror();else if(t.id=='arr')arr();else if(t.id=='par')polar();else if(t.id=='pf')pFinish();else if(t.id=='pu'){pp.pop();pDraw()}
  else if(t.id=='tt'){tt=!tt;t.classList.toggle('on',tt);msg(tt?'自動旋轉展示：開啟（拖曳畫面可暫停）':'自動旋轉展示：關閉')}});
 $('#msn').onchange=e=>{msS=+e.target.value||.1;msg('移動模式吸附間距：'+msS+' mm')};
 

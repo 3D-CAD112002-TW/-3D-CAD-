@@ -84,7 +84,7 @@ input[type=color]{width:90px;height:30px;padding:0;border:1px solid var(--bd);bo
 #bar #mn button.tg.on::after{content:none}
 #bar #mn h4{margin:0 0 0 4px;flex:none;white-space:nowrap}
 #bar #mn label{margin:0;padding:0 2px;white-space:nowrap}
-#acn,#asp,#pa,#pof,#sd{width:64px}
+#acn,#asp,#pa,#pof,#sd,#scr,#scs{width:64px}
 /* 設定面板與背景影片 */
 #bgv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 #bgv[hidden]{display:none}
@@ -116,7 +116,7 @@ input[type=color]{width:90px;height:30px;padding:0;border:1px solid var(--bd);bo
 <body>
 <div id="app">
 <div id="bar">
-<button data-m="add">新增</button><button data-m="ed">編輯</button><button data-m="sk">草圖</button><button data-m="vw">視角</button><button data-m="ds">顯示</button><button data-m="pj">專案</button><button id="stb" aria-haspopup="dialog" aria-expanded="false">設定</button><span id="as"></span>
+<button data-m="add">新增</button><button data-m="ed">編輯</button><button data-m="sk">草圖</button><button data-m="sc">雕刻</button><button data-m="vw">視角</button><button data-m="ds">顯示</button><button data-m="pj">專案</button><button id="stb" aria-haspopup="dialog" aria-expanded="false">設定</button><span id="as"></span>
 </div>
 <div id="vp"><video id="bgv" muted loop autoplay playsinline hidden></video><canvas id="cv"></canvas><div id="hint"></div><canvas id="gz"></canvas><button id="lbtn" aria-label="燈光" title="燈光">💡</button><button id="mvbtn" aria-label="移動模式" title="移動模式">✥</button><button id="rtbtn" aria-label="旋轉模式" title="旋轉模式">⟳</button><div id="lp" hidden><div id="lh"><div id="lt"></div><button id="lx" aria-label="關閉">✕</button></div><div id="lb"></div></div></div>
 <div id="side"><div id="tree"></div><div id="props"></div></div>
@@ -141,6 +141,7 @@ input[type=color]{width:90px;height:30px;padding:0;border:1px solid var(--bd);bo
 <div id="mn" hidden>
 <div data-g="add"><h4>基本體</h4><button data-a="box">▣ 方塊</button><button data-a="cyl">⬭ 圓柱</button><button data-a="sph">● 球體</button><button data-a="cone">▲ 圓錐</button><h4>進階體</h4><button data-a="tor">◎ 圓環（Torus）</button><button data-a="pyr">△ 角錐</button><button data-a="pip">◯ 管狀體（Pipe）</button><h4>正多面體</h4><label>種類<select id="py"><option value="4">正四面體</option><option value="6">正六面體</option><option value="8">正八面體</option><option value="12">正十二面體</option><option value="20">正二十面體</option></select></label><button data-a="ply">⬡ 新增正多面體</button><h4>貼圖</h4><button id="tx">🖼 匯入貼圖（套用到所選特徵）</button></div>
 <div data-g="ed" hidden><button id="ud" class="tg">↶ 復原</button><button id="rd" class="tg">↷ 重做</button><button id="mvm">✥ 移動模式（拖曳 XYZ 箭頭）</button><button id="rtm">⟳ 旋轉模式（拖曳 XYZ 圓環）</button><button id="dp">⧉ 複製所選特徵 (Ctrl+D)</button><button id="rn">✎ 重新命名所選特徵 (F2)</button><button id="bu2">⊕ 聯集（先選主體，再點選另一特徵）</button><button id="bs2">⊖ 切除（先選主體，再點選刀具）</button><button id="bi2">∩ 交集（先選主體，再點選另一特徵）</button><button id="mir">⇋ 鏡像複製</button><label>鏡像面<select id="mpl"><option value="0">YZ 面（X 反向）</option><option value="1">XZ 面（Y 反向）</option><option value="2">XY 面（Z 反向）</option></select></label><button id="arr">▦ 線性陣列</button><label>軸向<select id="aax"><option value="0">X</option><option value="1">Y</option><option value="2">Z</option></select></label><label>數量<input type="number" id="acn" value="3" min="2" max="20" step="1"></label><label>間距<input type="number" id="asp" value="50" step="1"></label><button id="par">◌ 環形陣列（用上方軸向與數量）</button><label>總角度<input type="number" id="pa" value="360" step="15"></label><label>移動吸附<select id="msn"><option value="0.1">0.1 mm</option><option value="1">1 mm</option><option value="5">5 mm</option><option value="10">10 mm</option></select></label></div>
+<div data-g="sc" hidden><button id="sct">🗿 進入／離開雕刻模式（作用於所選特徵）</button><label>雕刻工具<select id="scl"><option value="draw">推拉（沿法線）</option><option value="inf">膨脹</option><option value="smo">平滑</option><option value="pin">捏合</option><option value="flt">平整</option><option value="grab">抓取（拖曳變形）</option><option value="crs">刻線</option><option value="rgh">粗糙紋理</option></select></label><label>半徑<input type="number" id="scr" value="15" min="1" step="1"></label><label>強度<input type="number" id="scs" value="50" min="1" max="100" step="5"></label><label>方向<select id="scd"><option value="1">凸起／加強</option><option value="-1">凹陷／反向</option></select></label><label>對稱<select id="scx"><option value="0">關閉</option><option value="1">X 軸對稱</option></select></label><button id="scb">▦ 細分網格（面數 ×4，雕更細）</button></div>
 <div data-g="sk" hidden><button id="sk">開始草圖</button><label>基準面<select id="pl"><option value="front">前視基準面</option><option value="top">上視基準面</option><option value="right">右視基準面</option></select></label><label>草圖工具<select id="tl"><option value="r">矩形</option><option value="c">圓形</option><option value="p">多邊形（點選頂點）</option><option value="v">旋轉剖面（繞 Y 軸）</option></select></label><label>基準面偏移<input type="number" id="pof" value="0" step="5"></label><label>伸長深度<input type="number" id="sd" value="20" min="1" step="5"></label><label>方向<select id="sdr"><option value="pos">正向</option><option value="neg">反向</option><option value="mid">雙向對稱</option></select></label><label>完成後<select id="sm"><option value="add">新增特徵</option><option value="cut">從所選主體切除</option></select></label><button id="pu">↶ 退一點</button><button id="pf">✔ 完成多邊形</button></div>
 <div data-g="vw" hidden><button data-v="front">前視圖</button><button data-v="top">上視圖</button><button data-v="right">右視圖</button><button data-v="iso">等角視圖</button><button data-v="fit">縮放至全部</button><button id="tt" class="tg">⟲ 自動旋轉展示</button></div>
 <div data-g="ds" hidden><button id="wf" class="tg">線框顯示</button><button id="gd" class="tg on">顯示格線</button><button id="sa">👁 全部顯示特徵</button><button id="ha">🚫 全部隱藏特徵</button><button id="ms">📏 量測距離（M）</button><button id="hd">隱藏介面</button></div>
@@ -407,7 +408,7 @@ function ren(id){const f=F.find(x=>x.id==id),s=$(`#tree [data-id="${id}"] span`)
 $('#tree').ondblclick=e=>{const i=e.target.closest('[data-id]');if(i&&!e.target.dataset.v)ren(+i.dataset.id)};
 addEventListener('keydown',e=>{if(e.key=='F2'&&sel&&!/INPUT|SELECT/.test(e.target.tagName)){e.preventDefault();ren(sel)}});
 /* 草圖 → 伸長 */
-function hint(){$('#hint').textContent=bo?bHint():ms?'量測模式：依序點選模型表面兩點，再點一次重新量測・Esc 結束':sk?(pm()?`${PL[$('#pl').value][2]}草圖：逐點點選頂點（5 mm 格點）${$('#tl').value=='v'?'，剖面畫在 Y 軸右側':''}，點回第一點或按「完成多邊形」封閉`:`${PL[$('#pl').value][2]}草圖：拖曳繪製${$('#tl').value=='r'?'矩形':'圓形'}，放開後自動伸長凸台`):rtOn?'旋轉模式：點選模型，拖曳 X／Y／Z 圓環旋轉・拖曳其他處旋轉視角':mm?'移動模式：點選模型，拖曳 X／Y／Z 箭頭移動・拖曳其他處旋轉視角':'拖曳旋轉・雙指縮放／平移・點選物件編輯・G 移動 R 旋轉 M 量測 F 全部 方向鍵微移'}
+function hint(){$('#hint').textContent=bo?bHint():ms?'量測模式：依序點選模型表面兩點，再點一次重新量測・Esc 結束':SCS?'雕刻模式：在模型上拖曳雕刻；空白處拖曳旋轉視角；雙指縮放':sk?(pm()?`${PL[$('#pl').value][2]}草圖：逐點點選頂點（5 mm 格點）${$('#tl').value=='v'?'，剖面畫在 Y 軸右側':''}，點回第一點或按「完成多邊形」封閉`:`${PL[$('#pl').value][2]}草圖：拖曳繪製${$('#tl').value=='r'?'矩形':'圓形'}，放開後自動伸長凸台`):rtOn?'旋轉模式：點選模型，拖曳 X／Y／Z 圓環旋轉・拖曳其他處旋轉視角':mm?'移動模式：點選模型，拖曳 X／Y／Z 箭頭移動・拖曳其他處旋轉視角':'拖曳旋轉・雙指縮放／平移・點選物件編輯・G 移動 R 旋轉 M 量測 F 全部 方向鍵微移'}
 function startSk(k){mvSet(false);rtSet(false);bo=null;sk=true;$('#pl').value=k;pp=[];pDraw();SP.rotation.set(PL[k][0],PL[k][1],0);SP.position.copy(new THREE.Vector3(0,0,1).applyEuler(SP.rotation).multiplyScalar(+$('#pof').value||0));SP.updateMatrixWorld(true);SP.visible=true;G0.visible=false;tg.copy(SP.position);view(k);$('#sk').textContent='結束草圖';$('#sk').classList.add('on');$('[data-m=sk]').classList.add('on');hint()}
 function endSk(){sk=false;cancelDraw();pp=[];pDraw();SP.visible=false;G0.visible=$('#gd').classList.contains('on');$('#sk').textContent='開始草圖';$('#sk').classList.remove('on');$('[data-m=sk]').classList.remove('on');hint()}
 const sn=v=>Math.round(v/5)*5,RC=new THREE.Raycaster(),M=new THREE.Vector2();
@@ -444,14 +445,56 @@ function polar(){const f=F.find(x=>x.id==sel);if(!f)return msg('請先選取要�
   const g={id:nid++,t:f.t,p:{...f.p},pos:new THREE.Vector3().fromArray(f.pos).applyQuaternion(dq).toArray().map(x=>+x.toFixed(3)),rot:[eu.x,eu.y,eu.z],c:f.c,vis:f.vis,name:f.name+' 環列'+i,o:f.o,tex:f.tex,mat:f.mat,rho:f.rho};F.push(g);build(g)}
  select(f.id);push();msg(`已繞世界 ${'XYZ'[a]} 軸環形陣列 ${n} 個（總角度 ${T}°，可一次復原）`)}
 addEventListener('keydown',e=>{if(e.key=='Enter'&&pm()&&!/INPUT|SELECT/.test(e.target.tagName))pFinish()});
+/* 雕刻：將特徵轉為可雕刻網格（焊接頂點、索引幾何），筆刷以頂點位移，每筆畫存一次歷史 */
+let SCS=null,SCK=null;const SMAX=40000;
+function scWeld(v){const n=v.length-v.length%9,M=new Map(),U=[],I=new Uint32Array(n/3);for(let i=0;i<n;i+=3){const k=Math.round(v[i]*1e3)+','+Math.round(v[i+1]*1e3)+','+Math.round(v[i+2]*1e3);let j=M.get(k);if(j===undefined){j=U.length/3;M.set(k,j);U.push(v[i],v[i+1],v[i+2])}I[i/3]=j}return{U:new Float32Array(U),I}}
+function scGeo(){const f=SCS.f,g=new THREE.BufferGeometry(),I=SCS.I;g.setAttribute('position',new THREE.BufferAttribute(SCS.U,3));g.setIndex(new THREE.BufferAttribute(I,1));g.computeVertexNormals();g.computeBoundingSphere();g.computeBoundingBox();
+ f.m.geometry.dispose();f.m.geometry=g;f.m.children[0].visible=false;f.m.material.map=null;f.m.material.needsUpdate=true;
+ const N=Array.from({length:SCS.U.length/3},()=>new Set());for(let i=0;i<I.length;i+=3){const a=I[i],b=I[i+1],c=I[i+2];N[a].add(b).add(c);N[b].add(a).add(c);N[c].add(a).add(b)}
+ SCS.N=N.map(x=>[...x]);SCS.bx=(g.boundingBox.min.x+g.boundingBox.max.x)/2}
+function scSub(){const{U,I}=SCS,E=new Map(),nu=Array.from(U),ni=[],mid=(a,b)=>{const k=a<b?a+'_'+b:b+'_'+a;let m=E.get(k);if(m===undefined){m=nu.length/3;E.set(k,m);nu.push((U[a*3]+U[b*3])/2,(U[a*3+1]+U[b*3+1])/2,(U[a*3+2]+U[b*3+2])/2)}return m};
+ for(let i=0;i<I.length;i+=3){const a=I[i],b=I[i+1],c=I[i+2],d=mid(a,b),e=mid(b,c),f=mid(c,a);ni.push(a,d,f,d,b,e,f,e,c,d,e,f)}
+ SCS.U=new Float32Array(nu);SCS.I=Uint32Array.from(ni);scGeo()}
+function scSave(){const{f,U,I}=SCS,v=new Array(I.length*3);for(let i=0;i<I.length;i++){const j=I[i]*3;v[i*3]=+U[j].toFixed(3);v[i*3+1]=+U[j+1].toFixed(3);v[i*3+2]=+U[j+2].toFixed(3)}f.p={v,s:1,b:1,r:(f.p.r||0)+1};push()}
+function scOn(){const f=F.find(x=>x.id==sel);if(!f)return msg('請先選取要雕刻的特徵');
+ if(f.t=='mesh'){const k=+f.p.s||1;if(k!=1){f.p={...f.p,v:f.p.v.map(x=>x*k),s:1}}}
+ else{const g0=geo(f),g1=g0.index?g0.toNonIndexed():g0;f.p={v:Array.from(g1.attributes.position.array,x=>+x.toFixed(4)),s:1,b:1};f.t='mesh';f.tex=null;g0.dispose();if(g1!==g0)g1.dispose()}
+ const w=scWeld(f.p.v);if(w.I.length/3>SMAX)return msg('面數過多（上限 '+SMAX+' 面），無法雕刻');
+ SCS={f,...w};scGeo();while(SCS.I.length/3<6000&&SCS.I.length/3*4<=SMAX)scSub();scSave();$('#sct').classList.add('on');hint();msg('已進入雕刻模式（已轉為網格並自動細分；可按復原還原）')}
+function scOff(q){if(!SCS)return;const f=SCS.f;SCS=SCK=null;$('#sct').classList.remove('on');if(!q&&F.includes(f)){build(f);select(f.id)}hint()}
+function scFin(){const g=SCS.f.m.geometry;g.computeVertexNormals();g.attributes.position.needsUpdate=true;g.attributes.normal.needsUpdate=true;g.computeBoundingSphere();g.computeBoundingBox()}
+function scDab(c){const{U,N,f}=SCS,Nm=f.m.geometry.attributes.normal.array,r=+$('#scr').value||15,st=cl(+$('#scs').value||50,1,100)/100,t=$('#scl').value,dr=+$('#scd').value,B=[];let nx=0,ny=0,nz=0;
+ for(let i=0;i<U.length;i+=3){const q=Math.hypot(U[i]-c[0],U[i+1]-c[1],U[i+2]-c[2]);if(q<r){const u=q/r;B.push(i,(1-u*u)**2);if(q<r*.6){nx+=Nm[i];ny+=Nm[i+1];nz+=Nm[i+2]}}}
+ const l=Math.hypot(nx,ny,nz)||1;nx/=l;ny/=l;nz/=l;
+ for(let j=0;j<B.length;j+=2){const i=B[j],w=B[j+1],k=w*st*r*.08*dr;
+  if(t=='draw'){U[i]+=nx*k;U[i+1]+=ny*k;U[i+2]+=nz*k}
+  else if(t=='inf'){U[i]+=Nm[i]*k;U[i+1]+=Nm[i+1]*k;U[i+2]+=Nm[i+2]*k}
+  else if(t=='smo'){const a=N[i/3],n=a.length||1,s=Math.min(1,w*st*.8);let X=0,Y=0,Z=0;for(const m of a){X+=U[m*3];Y+=U[m*3+1];Z+=U[m*3+2]}U[i]+=(X/n-U[i])*s;U[i+1]+=(Y/n-U[i+1])*s;U[i+2]+=(Z/n-U[i+2])*s}
+  else if(t=='pin'){const s=w*st*.15*dr;U[i]+=(c[0]-U[i])*s;U[i+1]+=(c[1]-U[i+1])*s;U[i+2]+=(c[2]-U[i+2])*s}
+  else if(t=='flt'){const d=(U[i]-c[0])*nx+(U[i+1]-c[1])*ny+(U[i+2]-c[2])*nz,s=Math.min(1,w*st*.6);U[i]-=nx*d*s;U[i+1]-=ny*d*s;U[i+2]-=nz*d*s}
+  else if(t=='crs'){const e=-w*w*st*r*.1*dr,s=w*w*st*.1;U[i]+=nx*e+(c[0]-U[i])*s;U[i+1]+=ny*e+(c[1]-U[i+1])*s;U[i+2]+=nz*e+(c[2]-U[i+2])*s}
+  else if(t=='rgh'){const e=(Math.random()-.5)*w*st*r*.1;U[i]+=nx*e;U[i+1]+=ny*e;U[i+2]+=nz*e}}}
+function scHit(e){ray(e);const h=RC.intersectObject(SCS.f.m,false)[0];return h&&{h,c:SCS.f.m.worldToLocal(h.point.clone()).toArray()}}
+function scDabs(c){scDab(c);if($('#scx').value=='1')scDab([2*SCS.bx-c[0],c[1],c[2]]);scFin()}
+function scStart(e){if(e.button!=0||!F.includes(SCS.f)){if(!F.includes(SCS.f))scOff(true);return false}const r=scHit(e);if(!r)return false;
+ SCK={id:e.pointerId,last:r.c,ch:1};if($('#scl').value!='grab')scDabs(r.c);
+ else{const{U}=SCS,R=+$('#scr').value||15,G=[];for(let i=0;i<U.length;i+=3){const q=Math.hypot(U[i]-r.c[0],U[i+1]-r.c[1],U[i+2]-r.c[2]);if(q<R){const u=q/R;G.push(i,(1-u*u)**2,U[i],U[i+1],U[i+2])}}
+  SCK.G=G;SCK.p0=r.h.point.clone();SCK.pl=new THREE.Plane().setFromNormalAndCoplanarPoint(C.getWorldDirection(new THREE.Vector3()),SCK.p0)}return true}
+function scDrag(e){if($('#scl').value=='grab'){ray(e);const p=new THREE.Vector3();if(!RC.ray.intersectPlane(SCK.pl,p))return;const m=SCS.f.m,a=m.worldToLocal(SCK.p0.clone()),d=m.worldToLocal(p).sub(a),U=SCS.U,G=SCK.G;
+  for(let j=0;j<G.length;j+=5){const i=G[j],w=G[j+1];U[i]=G[j+2]+d.x*w;U[i+1]=G[j+3]+d.y*w;U[i+2]=G[j+4]+d.z*w}scFin();return}
+ const r=scHit(e);if(!r)return;if(Math.hypot(r.c[0]-SCK.last[0],r.c[1]-SCK.last[1],r.c[2]-SCK.last[2])>=(+$('#scr').value||15)*.2){SCK.last=r.c;scDabs(r.c)}}
+function scEnd(){SCK=null;if(SCS)scSave()}
+$('#mn').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;if(t.id=='sct')SCS?scOff():scOn();else if(t.id=='scb'){if(!SCS)return msg('請先進入雕刻模式');if(SCS.I.length/3*4>SMAX)return msg('面數已達上限（'+SMAX+' 面）');scSub();scSave();msg('已細分網格：'+SCS.I.length/3+' 面')}});
+{const _go=goto,_ld=load;goto=function(i){scOff(true);return _go(i)};load=function(o){scOff(true);return _ld(o)}}
 
 /* 指標操作：旋轉／平移／縮放／選取／繪圖 */
 const P=new Map();let mv=0,pd=0;const d2=()=>{const[a,b]=[...P.values()];return Math.hypot(a[0]-b[0],a[1]-b[1])||1};
 function pick(e){ray(e);const h=RC.intersectObjects(F.filter(f=>f.vis).map(f=>f.m),false)[0];const k=h?h.object.userData.id:null;if(ms)return mPick(h);bo?bApply(k):select(k)}
 cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);P.set(e.pointerId,[e.clientX,e.clientY]);mv=0;
- if(P.size==2){cancelDraw();mvEnd();rtEnd();pd=d2()}else if(mvStart(e)){}else if(rtStart(e)){}else if(sk&&!pm()&&e.button==0){const a=onPl(e);if(a)drag={a,b:a,id:e.pointerId}}});
+ if(P.size==2){cancelDraw();mvEnd();rtEnd();pd=d2()}else if(SCS&&scStart(e)){}else if(mvStart(e)){}else if(rtStart(e)){}else if(sk&&!pm()&&e.button==0){const a=onPl(e);if(a)drag={a,b:a,id:e.pointerId}}});
 cv.addEventListener('pointermove',e=>{const o=P.get(e.pointerId);if(!o)return;const dx=e.clientX-o[0],dy=e.clientY-o[1];P.set(e.pointerId,[e.clientX,e.clientY]);mv+=Math.abs(dx)+Math.abs(dy);
  if(P.size==2){const d=d2();rad=cl(rad*pd/d,5,2500);pd=d;pan(dx/2,dy/2)}
+ else if(SCK&&SCK.id==e.pointerId)scDrag(e);
  else if(md&&md.id==e.pointerId)mvDrag(e);
  else if(rtD&&rtD.id==e.pointerId)rtDrag(e);
  else if(drag){const b=onPl(e);if(b){drag.b=b;preview()}}
@@ -459,11 +502,12 @@ cv.addEventListener('pointermove',e=>{const o=P.get(e.pointerId);if(!o)return;co
  else if(!sk){th-=dx*.008;ph=cl(ph-dy*.008,.02,3.12)}
  cam()});
 cv.addEventListener('pointerup',e=>{if(!P.delete(e.pointerId))return;pd=0;
- if(md&&md.id==e.pointerId)mvEnd();
+ if(SCK&&SCK.id==e.pointerId)scEnd();
+ else if(md&&md.id==e.pointerId)mvEnd();
  else if(rtD&&rtD.id==e.pointerId)rtEnd();
  else if(drag&&drag.id==e.pointerId){if(drag.a[0]!=drag.b[0]||drag.a[1]!=drag.b[1])commit();else cancelDraw()}
  else if(pm()&&mv<6&&!P.size)pAdd(e);else if(!sk&&mv<6&&!P.size)pick(e)});
-cv.addEventListener('pointercancel',e=>{P.delete(e.pointerId);cancelDraw();if(md&&md.id==e.pointerId)mvEnd();if(rtD&&rtD.id==e.pointerId)rtEnd()});
+cv.addEventListener('pointercancel',e=>{P.delete(e.pointerId);cancelDraw();if(SCK)scEnd();if(md&&md.id==e.pointerId)mvEnd();if(rtD&&rtD.id==e.pointerId)rtEnd()});
 cv.addEventListener('wheel',e=>{e.preventDefault();rad=cl(rad*(e.deltaY>0?1.1:.9),5,2500);cam()},{passive:false});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 
@@ -520,7 +564,7 @@ $('#fi').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)re
 
 /* 復原／重做：歷史快照（網格頂點以參考共用，不複製） */
 let H=[],hi=-1;
-const sg=()=>JSON.stringify([nid,F.map(f=>[f.id,f.t,f.name,f.c,f.vis,f.pos,f.rot,f.t=='mesh'?[f.p.s,f.p.v.length]:f.p,f.o,f.tex?f.tex.length+f.tex.slice(-12):0,f.mat,f.rho])]),cp=r=>({...r,p:{...r.p},pos:r.pos.slice(),rot:r.rot.slice()});
+const sg=()=>JSON.stringify([nid,F.map(f=>[f.id,f.t,f.name,f.c,f.vis,f.pos,f.rot,f.t=='mesh'?[f.p.s,f.p.v.length,f.p.r||0]:f.p,f.o,f.tex?f.tex.length+f.tex.slice(-12):0,f.mat,f.rho])]),cp=r=>({...r,p:{...r.p},pos:r.pos.slice(),rot:r.rot.slice()});
 function hs(){$('#ud').disabled=hi<1;$('#rd').disabled=hi>=H.length-1}
 function push(){const k=sg();if(H[hi]&&H[hi].k==k)return;
  H=H.slice(0,hi+1);H.push({k,n:nid,s:sel,F:F.map(({m,v,...r})=>cp(r))});if(H.length>40)H.shift();hi=H.length-1;hs();asv()}
